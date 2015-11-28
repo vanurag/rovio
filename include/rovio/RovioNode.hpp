@@ -84,6 +84,7 @@ class RovioNode{
   ros::Subscriber subGroundtruth_;
   ros::Publisher pubOdometry_;
   ros::Publisher pubTransform_;
+  ros::Publisher pubITMTransform_;  // InfiniTAM IMU pose publisher
   tf::TransformBroadcaster tb_;
   ros::Publisher pubPcl_;            /**<Publisher: Ros point cloud, visualizing the landmarks.*/
   ros::Publisher pubURays_;          /**<Publisher: Ros line marker, indicating the depth uncertainty of a landmark.*/
@@ -92,6 +93,7 @@ class RovioNode{
 
   // Ros Messages
   geometry_msgs::TransformStamped transformMsg_;
+  geometry_msgs::TransformStamped ITMtransformMsg_;
   nav_msgs::Odometry odometryMsg_;
   geometry_msgs::PoseWithCovarianceStamped extrinsicsMsg_[mtState::nMax_];
   sensor_msgs::PointCloud2 pclMsg_;
@@ -141,6 +143,7 @@ class RovioNode{
 
     // Advertise topics
     pubTransform_ = nh_.advertise<geometry_msgs::TransformStamped>("rovio/transform", 1);
+    pubITMTransform_ = nh_.advertise<geometry_msgs::TransformStamped>("rovio/ITM_transform", 1);
     pubOdometry_ = nh_.advertise<nav_msgs::Odometry>("rovio/odometry", 1);
     pubPcl_ = nh_.advertise<sensor_msgs::PointCloud2>("rovio/pcl", 1);
     pubURays_ = nh_.advertise<visualization_msgs::Marker>("rovio/urays", 1 );
@@ -162,6 +165,8 @@ class RovioNode{
     // Initialize messages
     transformMsg_.header.frame_id = world_frame_;
     transformMsg_.child_frame_id = imu_frame_;
+    ITMtransformMsg_.header.frame_id = imu_frame_;
+    ITMtransformMsg_.child_frame_id = world_frame_;
     odometryMsg_.header.frame_id = world_frame_;
     odometryMsg_.child_frame_id = imu_frame_;
     msgSeq_ = 1;
@@ -536,6 +541,20 @@ class RovioNode{
           transformMsg_.transform.rotation.z = imuOutput_.qBW().z();
           transformMsg_.transform.rotation.w = imuOutput_.qBW().w();
           pubTransform_.publish(transformMsg_);
+        }
+
+        // Send InfiniTAM compatible IMU pose message.
+        if(pubITMTransform_.getNumSubscribers() > 0){
+          ITMtransformMsg_.header.seq = msgSeq_;
+          ITMtransformMsg_.header.stamp = ros::Time(mpFilter_->safe_.t_);
+          ITMtransformMsg_.transform.translation.x = -imuOutput_.WrWB()(0);
+          ITMtransformMsg_.transform.translation.y = -imuOutput_.WrWB()(1);
+          ITMtransformMsg_.transform.translation.z = -imuOutput_.WrWB()(2);
+          ITMtransformMsg_.transform.rotation.x = imuOutput_.qBW().inverted().x();
+          ITMtransformMsg_.transform.rotation.y = imuOutput_.qBW().inverted().y();
+          ITMtransformMsg_.transform.rotation.z = imuOutput_.qBW().inverted().z();
+          ITMtransformMsg_.transform.rotation.w = imuOutput_.qBW().inverted().w();
+          pubITMTransform_.publish(ITMtransformMsg_);
         }
 
         // Publish Extrinsics
