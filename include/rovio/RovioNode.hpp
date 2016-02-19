@@ -547,13 +547,14 @@ class RovioNode{
         if(pubITMTransform_.getNumSubscribers() > 0){
           ITMtransformMsg_.header.seq = msgSeq_;
           ITMtransformMsg_.header.stamp = ros::Time(mpFilter_->safe_.t_);
-          ITMtransformMsg_.transform.translation.x = -imuOutput_.WrWB()(0);
-          ITMtransformMsg_.transform.translation.y = -imuOutput_.WrWB()(1);
-          ITMtransformMsg_.transform.translation.z = -imuOutput_.WrWB()(2);
+          ITMtransformMsg_.transform.translation.x = imuOutput_.WrWB()(0);
+          ITMtransformMsg_.transform.translation.y = imuOutput_.WrWB()(1);
+          ITMtransformMsg_.transform.translation.z = imuOutput_.WrWB()(2);
           ITMtransformMsg_.transform.rotation.x = imuOutput_.qBW().inverted().x();
           ITMtransformMsg_.transform.rotation.y = imuOutput_.qBW().inverted().y();
           ITMtransformMsg_.transform.rotation.z = imuOutput_.qBW().inverted().z();
           ITMtransformMsg_.transform.rotation.w = imuOutput_.qBW().inverted().w();
+
           pubITMTransform_.publish(ITMtransformMsg_);
         }
 
