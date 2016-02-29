@@ -43,6 +43,8 @@
 #include "rovio/RovioFilter.hpp"
 #include <tf/transform_broadcaster.h>
 #include <visualization_msgs/Marker.h>
+#include <svo_msgs/Info.h>
+#include <svo_msgs/DenseInput.h>
 
 #include "rovio/CoordinateTransform/RovioOutput.hpp"
 #include "rovio/CoordinateTransform/FeatureOutput.hpp"
@@ -85,6 +87,7 @@ class RovioNode{
   ros::Publisher pubOdometry_;
   ros::Publisher pubTransform_;
   ros::Publisher pubITMTransform_;  // InfiniTAM IMU pose publisher
+  ros::Publisher pubREMODEDense_[mtState::nCam_];        // Publish Dense Input messages for REMODE
   tf::TransformBroadcaster tb_;
   ros::Publisher pubPcl_;            /**<Publisher: Ros point cloud, visualizing the landmarks.*/
   ros::Publisher pubURays_;          /**<Publisher: Ros line marker, indicating the depth uncertainty of a landmark.*/
@@ -94,6 +97,7 @@ class RovioNode{
   // Ros Messages
   geometry_msgs::TransformStamped transformMsg_;
   geometry_msgs::TransformStamped ITMtransformMsg_;
+  svo_msgs::DenseInput REMODEDenseMsg_[mtState::nCam_];
   nav_msgs::Odometry odometryMsg_;
   geometry_msgs::PoseWithCovarianceStamped extrinsicsMsg_[mtState::nMax_];
   sensor_msgs::PointCloud2 pclMsg_;
@@ -144,6 +148,9 @@ class RovioNode{
     // Advertise topics
     pubTransform_ = nh_.advertise<geometry_msgs::TransformStamped>("rovio/transform", 1);
     pubITMTransform_ = nh_.advertise<geometry_msgs::TransformStamped>("rovio/ITM_transform", 1);
+    for(int camID=0;camID<mtState::nCam_;camID++){
+      pubREMODEDense_[camID] = nh_.advertise<svo_msgs::DenseInput>("rovio/dense_input" + std::to_string(camID), 1);
+    }
     pubOdometry_ = nh_.advertise<nav_msgs::Odometry>("rovio/odometry", 1);
     pubPcl_ = nh_.advertise<sensor_msgs::PointCloud2>("rovio/pcl", 1);
     pubURays_ = nh_.advertise<visualization_msgs::Marker>("rovio/urays", 1 );
@@ -167,6 +174,9 @@ class RovioNode{
     transformMsg_.child_frame_id = imu_frame_;
     ITMtransformMsg_.header.frame_id = imu_frame_;
     ITMtransformMsg_.child_frame_id = world_frame_;
+    for(int camID=0;camID<mtState::nCam_;camID++){
+      REMODEDenseMsg_[camID].header.frame_id = world_frame_;
+    }
     odometryMsg_.header.frame_id = world_frame_;
     odometryMsg_.child_frame_id = imu_frame_;
     msgSeq_ = 1;
@@ -556,6 +566,54 @@ class RovioNode{
           ITMtransformMsg_.transform.rotation.w = imuOutput_.qBW().inverted().w();
 
           pubITMTransform_.publish(ITMtransformMsg_);
+        }
+
+        // Publish Dense Input message for REMODE
+        for(int camID=0;camID<mtState::nCam_;camID++){
+          if(pubREMODEDense_[camID].getNumSubscribers() > 0){
+            REMODEDenseMsg_[camID].header.seq = msgSeq_;
+            REMODEDenseMsg_[camID].header.stamp = ros::Time(mpFilter_->safe_.t_);
+            REMODEDenseMsg_[camID].frame_id = msgSeq_;
+
+            // current image
+            cv_bridge::CvImage img_msg;
+            img_msg.header.stamp = REMODEDenseMsg_[camID].header.stamp;
+            img_msg.header.frame_id = "camera";
+            img_msg.image = imgUpdateMeas_.template get<mtImgMeas::_aux>().pyr_[camID].imgs_[0];
+            img_msg.encoding = sensor_msgs::image_encodings::MONO8;
+            REMODEDenseMsg_[camID].image = *img_msg.toImageMsg();
+
+            // min-max depth z for point features
+            int offset = 0;
+            float min_z = std::numeric_limits<float>::max();
+            float max_z = std::numeric_limits<float>::min();
+            for (unsigned int i=0;i<mtState::nMax_; i++, offset += pclMsg_.point_step) {
+//              if(filterState.fsm_.isValid_[i]){
+              float dist = pclMsg_.data[offset + pclMsg_.fields[7].offset];
+//              std::cout << "dist check: " << dist << std::endl;
+              min_z = fmin(dist, min_z);
+              max_z = fmax(dist, max_z);
+//              }
+            }
+//            std::cout << "z check: " << min_z << " " << max_z << std::endl;
+//            REMODEDenseMsg_[camID].min_depth = min_z;
+//            REMODEDenseMsg_[camID].max_depth = max_z;
+            REMODEDenseMsg_[camID].min_depth = 0.1;
+            REMODEDenseMsg_[camID].max_depth = 3.0;
+
+            // cam pose in world frame
+            QPD qIC = (state.qCM(camID) * imuOutput_.qBW()).inverted();
+            rot::RotationMatrixPD rWB(imuOutput_.qBW().inverted());
+            V3D MrIC = rWB.matrix()*state.MrMC(camID) + imuOutput_.WrWB();
+            REMODEDenseMsg_[camID].pose.orientation.x = qIC.x();
+            REMODEDenseMsg_[camID].pose.orientation.y = qIC.y();
+            REMODEDenseMsg_[camID].pose.orientation.z = qIC.z();
+            REMODEDenseMsg_[camID].pose.position.x = MrIC.x();
+            REMODEDenseMsg_[camID].pose.position.y = MrIC.y();
+            REMODEDenseMsg_[camID].pose.position.z = MrIC.z();
+
+            pubREMODEDense_[camID].publish(REMODEDenseMsg_[camID]);
+          }
         }
 
         // Publish Extrinsics
