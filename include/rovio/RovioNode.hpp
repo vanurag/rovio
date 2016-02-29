@@ -568,54 +568,6 @@ class RovioNode{
           pubITMTransform_.publish(ITMtransformMsg_);
         }
 
-        // Publish Dense Input message for REMODE
-        for(int camID=0;camID<mtState::nCam_;camID++){
-          if(pubREMODEDense_[camID].getNumSubscribers() > 0){
-            REMODEDenseMsg_[camID].header.seq = msgSeq_;
-            REMODEDenseMsg_[camID].header.stamp = ros::Time(mpFilter_->safe_.t_);
-            REMODEDenseMsg_[camID].frame_id = msgSeq_;
-
-            // current image
-            cv_bridge::CvImage img_msg;
-            img_msg.header.stamp = REMODEDenseMsg_[camID].header.stamp;
-            img_msg.header.frame_id = "camera";
-            img_msg.image = imgUpdateMeas_.template get<mtImgMeas::_aux>().pyr_[camID].imgs_[0];
-            img_msg.encoding = sensor_msgs::image_encodings::MONO8;
-            REMODEDenseMsg_[camID].image = *img_msg.toImageMsg();
-
-            // min-max depth z for point features
-            int offset = 0;
-            float min_z = std::numeric_limits<float>::max();
-            float max_z = std::numeric_limits<float>::min();
-            for (unsigned int i=0;i<mtState::nMax_; i++, offset += pclMsg_.point_step) {
-//              if(filterState.fsm_.isValid_[i]){
-              float dist = pclMsg_.data[offset + pclMsg_.fields[7].offset];
-//              std::cout << "dist check: " << dist << std::endl;
-              min_z = fmin(dist, min_z);
-              max_z = fmax(dist, max_z);
-//              }
-            }
-//            std::cout << "z check: " << min_z << " " << max_z << std::endl;
-//            REMODEDenseMsg_[camID].min_depth = min_z;
-//            REMODEDenseMsg_[camID].max_depth = max_z;
-            REMODEDenseMsg_[camID].min_depth = 0.1;
-            REMODEDenseMsg_[camID].max_depth = 3.0;
-
-            // cam pose in world frame
-            QPD qIC = (state.qCM(camID) * imuOutput_.qBW()).inverted();
-            rot::RotationMatrixPD rWB(imuOutput_.qBW().inverted());
-            V3D MrIC = rWB.matrix()*state.MrMC(camID) + imuOutput_.WrWB();
-            REMODEDenseMsg_[camID].pose.orientation.x = qIC.x();
-            REMODEDenseMsg_[camID].pose.orientation.y = qIC.y();
-            REMODEDenseMsg_[camID].pose.orientation.z = qIC.z();
-            REMODEDenseMsg_[camID].pose.position.x = MrIC.x();
-            REMODEDenseMsg_[camID].pose.position.y = MrIC.y();
-            REMODEDenseMsg_[camID].pose.position.z = MrIC.z();
-
-            pubREMODEDense_[camID].publish(REMODEDenseMsg_[camID]);
-          }
-        }
-
         // Publish Extrinsics
         for(int camID=0;camID<mtState::nCam_;camID++){
           if(pubExtrinsics_[camID].getNumSubscribers() > 0){
@@ -665,7 +617,14 @@ class RovioNode{
         }
 
         // PointCloud2 message.
-        if(pubPcl_.getNumSubscribers() > 0 || pubURays_.getNumSubscribers() > 0){
+        bool need_remode = false;   // If REMODE msgs are required, evaluate point clouds
+        for (int camID=0; camID < mtState::nCam_; ++camID) {
+          if (pubREMODEDense_[camID].getNumSubscribers() > 0) {
+            need_remode = true;
+            break;
+          }
+        }
+        if(pubPcl_.getNumSubscribers() > 0 || pubURays_.getNumSubscribers() > 0 || need_remode){
           pclMsg_.header.seq = msgSeq_;
           pclMsg_.header.stamp = ros::Time(mpFilter_->safe_.t_);
           float badPoint = std::numeric_limits<float>::quiet_NaN();  // Invalid point.
@@ -748,6 +707,55 @@ class RovioNode{
           }
           pubPcl_.publish(pclMsg_);
           pubURays_.publish(markerMsg_);
+        }
+
+        // Publish Dense Input message for REMODE
+        for(int camID=0;camID<mtState::nCam_;camID++){
+          if(pubREMODEDense_[camID].getNumSubscribers() > 0){
+            REMODEDenseMsg_[camID].header.seq = msgSeq_;
+            REMODEDenseMsg_[camID].header.stamp = ros::Time(mpFilter_->safe_.t_);
+            REMODEDenseMsg_[camID].frame_id = msgSeq_;
+
+            // current image
+            cv_bridge::CvImage img_msg;
+            img_msg.header.stamp = REMODEDenseMsg_[camID].header.stamp;
+            img_msg.header.frame_id = "camera";
+            img_msg.image = imgUpdateMeas_.template get<mtImgMeas::_aux>().pyr_[camID].imgs_[0];
+            img_msg.encoding = sensor_msgs::image_encodings::MONO8;
+            REMODEDenseMsg_[camID].image = *img_msg.toImageMsg();
+
+            // min-max depth z for point features
+            int offset = 0;
+            float min_z = std::numeric_limits<float>::max();
+            float max_z = std::numeric_limits<float>::min();
+//            std::cout << "num features: " << mtState::nMax_ << std::endl;
+            for (unsigned int i=0;i<mtState::nMax_; i++, offset += pclMsg_.point_step) {
+//              if(filterState.fsm_.isValid_[i]){
+              float dist = pclMsg_.data[offset + pclMsg_.fields[2].offset];
+//              std::cout << "dist check: " << dist << std::endl;
+              min_z = fmin(dist, min_z);
+              max_z = fmax(dist, max_z);
+//              }
+            }
+//            std::cout << "z check: " << min_z << " " << max_z << std::endl;
+            REMODEDenseMsg_[camID].min_depth = min_z;
+            REMODEDenseMsg_[camID].max_depth = max_z;
+//            REMODEDenseMsg_[camID].min_depth = 0.1;
+//            REMODEDenseMsg_[camID].max_depth = 3.0;
+
+            // cam pose in world frame
+            QPD qIC = (state.qCM(camID) * imuOutput_.qBW()).inverted();
+            rot::RotationMatrixPD rWB(imuOutput_.qBW().inverted());
+            V3D MrIC = rWB.matrix()*state.MrMC(camID) + imuOutput_.WrWB();
+            REMODEDenseMsg_[camID].pose.orientation.x = qIC.x();
+            REMODEDenseMsg_[camID].pose.orientation.y = qIC.y();
+            REMODEDenseMsg_[camID].pose.orientation.z = qIC.z();
+            REMODEDenseMsg_[camID].pose.position.x = MrIC.x();
+            REMODEDenseMsg_[camID].pose.position.y = MrIC.y();
+            REMODEDenseMsg_[camID].pose.position.z = MrIC.z();
+
+            pubREMODEDense_[camID].publish(REMODEDenseMsg_[camID]);
+          }
         }
       }
     }
