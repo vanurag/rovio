@@ -744,12 +744,54 @@ class RovioNode{
 //            REMODEDenseMsg_[camID].max_depth = 3.0;
 
             // cam pose in world frame
-            QPD qIC = (state.qCM(camID) * imuOutput_.qBW()).inverted();
-            rot::RotationMatrixPD rWB(imuOutput_.qBW().inverted());
+            MPD bla(-0.99976435,  0.01757809, -0.01273799,
+                    -0.01763682, -0.99983427,  0.00451293,
+                    -0.01265655,  0.00473652,  0.99990868);
+            std::cout << "qCM: " << std::endl;
+            std::cout << state.qCM(camID).x() << " "
+                      << state.qCM(camID).y() << " "
+                      << state.qCM(camID).z() << " "
+                      << state.qCM(camID).w() << " " << std::endl;
+            std::cout << "bla: " << std::endl;
+            std::cout << QPD(bla).x() << " "
+                      << QPD(bla).y() << " "
+                      << QPD(bla).z() << " "
+                      << QPD(bla).w() << " " << std::endl;
+            std::cout << "bla2: " << std::endl;
+            std::cout << MPD(QPD(bla)).matrix() << std::endl;
+            QPD q = (state.qCM(camID) * imuOutput_.qBW()).inverted(); // qIC in JPL convention
+//            QPD q = (imuOutput_.qBW()).inverted(); // test
+            std::cout << "q_jpl: " << std::endl;
+            std::cout << q.x() << " "
+                      << q.y() << " "
+                      << q.z() << " "
+                      << q.w() << " " << std::endl;
+            std::cout << "T_world_curr_rovio:" << std::endl;
+            std::cout << MPD(q).matrix() << std::endl;
+            // qIC in Hamilton convention
+            // method-1
+            double q_IC_w =
+                sqrt( (pow(q.x(), 2) + pow(q.y(), 2) + pow(q.z(), 2) + (3*pow(q.w(), 2)) - 1.0) / 2.0 );
+            QPD qIC(q_IC_w,
+                   -q.w()*q.x() / q_IC_w,
+                   -q.w()*q.y() / q_IC_w,
+                   -q.w()*q.z() / q_IC_w);
+            // method-2
+//            MPD RIC
+
+
+
+            std::cout << "q_ham: " << std::endl;
+            std::cout << qIC.x() << " "
+                      << qIC.y() << " "
+                      << qIC.z() << " "
+                      << qIC.w() << " " << std::endl;
+            MPD rWB(imuOutput_.qBW().inverted());
             V3D MrIC = rWB.matrix()*state.MrMC(camID) + imuOutput_.WrWB();
             REMODEDenseMsg_[camID].pose.orientation.x = qIC.x();
             REMODEDenseMsg_[camID].pose.orientation.y = qIC.y();
             REMODEDenseMsg_[camID].pose.orientation.z = qIC.z();
+            REMODEDenseMsg_[camID].pose.orientation.w = qIC.w();
             REMODEDenseMsg_[camID].pose.position.x = MrIC.x();
             REMODEDenseMsg_[camID].pose.position.y = MrIC.y();
             REMODEDenseMsg_[camID].pose.position.z = MrIC.z();
