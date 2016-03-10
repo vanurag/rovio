@@ -143,7 +143,7 @@ class RovioNode{
     subImu_ = nh_.subscribe("imu0", 1000, &RovioNode::imuCallback,this);
     subImg0_ = nh_.subscribe("cam0/image_raw", 1000, &RovioNode::imgCallback0,this);
     subImg1_ = nh_.subscribe("cam1/image_raw", 1000, &RovioNode::imgCallback1,this);
-    subGroundtruth_ = nh_.subscribe("pose", 1000, &RovioNode::groundtruthCallback,this);
+    subGroundtruth_ = nh_.subscribe("itm/pose", 1000, &RovioNode::groundtruthCallback,this);
 
     // Advertise topics
     pubTransform_ = nh_.advertise<geometry_msgs::TransformStamped>("rovio/transform", 1);
@@ -406,6 +406,7 @@ class RovioNode{
    *  @param transform - Groundtruth message.
    */
   void groundtruthCallback(const geometry_msgs::TransformStamped::ConstPtr& transform){
+    std::cout << "Updating ROVIO pose using ITM post-ICP pose" << std::endl;
     if(isInitialized_){
       poseUpdateMeas_.pos() = Eigen::Vector3d(transform->transform.translation.x,transform->transform.translation.y,transform->transform.translation.z);
       poseUpdateMeas_.att() = QPD(transform->transform.rotation.w,transform->transform.rotation.x,transform->transform.rotation.y,transform->transform.rotation.z);
@@ -744,50 +745,63 @@ class RovioNode{
 //            REMODEDenseMsg_[camID].max_depth = 3.0;
 
             // cam pose in world frame
-            MPD bla(-0.99976435,  0.01757809, -0.01273799,
-                    -0.01763682, -0.99983427,  0.00451293,
-                    -0.01265655,  0.00473652,  0.99990868);
-            std::cout << "qCM: " << std::endl;
-            std::cout << state.qCM(camID).x() << " "
-                      << state.qCM(camID).y() << " "
-                      << state.qCM(camID).z() << " "
-                      << state.qCM(camID).w() << " " << std::endl;
-            std::cout << "bla: " << std::endl;
-            std::cout << QPD(bla).x() << " "
-                      << QPD(bla).y() << " "
-                      << QPD(bla).z() << " "
-                      << QPD(bla).w() << " " << std::endl;
-            std::cout << "bla2: " << std::endl;
-            std::cout << MPD(QPD(bla)).matrix() << std::endl;
+//            MPD bla(-0.99976435,  0.01757809, -0.01273799,
+//                    -0.01763682, -0.99983427,  0.00451293,
+//                    -0.01265655,  0.00473652,  0.99990868);
+//            std::cout << "qCM: " << std::endl;
+//            std::cout << state.qCM(camID).x() << " "
+//                      << state.qCM(camID).y() << " "
+//                      << state.qCM(camID).z() << " "
+//                      << state.qCM(camID).w() << " " << std::endl;
+//            std::cout << "qCM_impl: " << std::endl;
+//            std::cout << state.qCM(camID).toImplementation().x() << " "
+//                      << state.qCM(camID).toImplementation().y() << " "
+//                      << state.qCM(camID).toImplementation().z() << " "
+//                      << state.qCM(camID).toImplementation().w() << " " << std::endl;
+//            std::cout << "bla: " << std::endl;
+//            std::cout << QPD(bla).x() << " "
+//                      << QPD(bla).y() << " "
+//                      << QPD(bla).z() << " "
+//                      << QPD(bla).w() << " " << std::endl;
+//            std::cout << "bla2: " << std::endl;
+//            std::cout << MPD(QPD(bla)).matrix() << std::endl;
             QPD q = (state.qCM(camID) * imuOutput_.qBW()).inverted(); // qIC in JPL convention
 //            QPD q = (imuOutput_.qBW()).inverted(); // test
-            std::cout << "q_jpl: " << std::endl;
-            std::cout << q.x() << " "
-                      << q.y() << " "
-                      << q.z() << " "
-                      << q.w() << " " << std::endl;
-            std::cout << "T_world_curr_rovio:" << std::endl;
-            std::cout << MPD(q).matrix() << std::endl;
+//            std::cout << "q_jpl: " << std::endl;
+//            std::cout << q.x() << " "
+//                      << q.y() << " "
+//                      << q.z() << " "
+//                      << q.w() << " " << std::endl;
+//            std::cout << "T_world_curr_rovio:" << std::endl;
+//            std::cout << MPD(q).matrix() << std::endl;
             // qIC in Hamilton convention
             // method-1
-            double q_IC_w =
-                sqrt( (pow(q.x(), 2) + pow(q.y(), 2) + pow(q.z(), 2) + (3*pow(q.w(), 2)) - 1.0) / 2.0 );
-            QPD qIC(q_IC_w,
-                   -q.w()*q.x() / q_IC_w,
-                   -q.w()*q.y() / q_IC_w,
-                   -q.w()*q.z() / q_IC_w);
+//            double q_IC_w =
+//                sqrt( (pow(q.x(), 2) + pow(q.y(), 2) + pow(q.z(), 2) + (3*pow(q.w(), 2)) - 1.0) / 2.0 );
+//            QPD qIC(q_IC_w,
+//                   -q.w()*q.x() / q_IC_w,
+//                   -q.w()*q.y() / q_IC_w,
+//                   -q.w()*q.z() / q_IC_w);
             // method-2
-//            MPD RIC
+            QPD qIC(q.w(), -q.x(), -q.y(), -q.z()); // qIC in Hamiltonian convention
 
 
 
-            std::cout << "q_ham: " << std::endl;
-            std::cout << qIC.x() << " "
-                      << qIC.y() << " "
-                      << qIC.z() << " "
-                      << qIC.w() << " " << std::endl;
+//            std::cout << "q_ham: " << std::endl;
+//            std::cout << qIC.x() << " "
+//                      << qIC.y() << " "
+//                      << qIC.z() << " "
+//                      << qIC.w() << " " << std::endl;
+//            std::cout << "qWB: " << std::endl;
+//            std::cout << imuOutput_.qBW().inverted().x() << " "
+//                      << imuOutput_.qBW().inverted().y() << " "
+//                      << imuOutput_.qBW().inverted().z() << " "
+//                      << imuOutput_.qBW().inverted().w() << " " << std::endl;
             MPD rWB(imuOutput_.qBW().inverted());
+//            std::cout << "rWB:" << std::endl;
+//            std::cout << rWB.matrix() << std::endl;
             V3D MrIC = rWB.matrix()*state.MrMC(camID) + imuOutput_.WrWB();
+//            V3D MrIC = imuOutput_.WrWB();
             REMODEDenseMsg_[camID].pose.orientation.x = qIC.x();
             REMODEDenseMsg_[camID].pose.orientation.y = qIC.y();
             REMODEDenseMsg_[camID].pose.orientation.z = qIC.z();
