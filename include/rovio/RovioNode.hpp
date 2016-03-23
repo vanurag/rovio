@@ -165,7 +165,7 @@ class RovioNode{
     subImu_ = nh_.subscribe("imu0", 1000, &RovioNode::imuCallback,this);
     subImg0_ = nh_.subscribe("cam0/image_raw", 1000, &RovioNode::imgCallback0,this);
     subImg1_ = nh_.subscribe("cam1/image_raw", 1000, &RovioNode::imgCallback1,this);
-    subGroundtruth_ = nh_.subscribe("itm/pose", 1000, &RovioNode::groundtruthCallback,this);
+    subGroundtruth_ = nh_.subscribe("drz_rig/raw_transform", 1000, &RovioNode::groundtruthCallback,this);
 
     // Advertise topics
     pubTransform_ = nh_.advertise<geometry_msgs::TransformStamped>("rovio/transform", 1);
