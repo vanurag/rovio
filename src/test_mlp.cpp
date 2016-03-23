@@ -124,7 +124,7 @@ TEST_F(MLPTesting, statistics) {
   for(int i=0;i<nCam_;i++){
     localQuality[i] = 1.0;
   }
-  double localVisibility = 1.0;
+  double jointLocalVisibility = 1.0;
   ASSERT_EQ(stat_.countTrackingStatistics(UNKNOWN),2);
   ASSERT_EQ(stat_.countTrackingStatistics(NOT_IN_FRAME),0);
   ASSERT_EQ(stat_.countTrackingStatistics(FAILED_ALIGNEMENT),0);
@@ -135,7 +135,7 @@ TEST_F(MLPTesting, statistics) {
   ASSERT_EQ(stat_.countInFrame(),0);
   ASSERT_EQ(stat_.countTracked(),0);
   stat_.increaseStatistics(0.1);
-  localVisibility = (1-1.0/stat_.localVisibilityRange_)*localVisibility;
+  jointLocalVisibility = (1-1.0/stat_.localVisibilityRange_)*jointLocalVisibility;
   ASSERT_EQ(stat_.countTrackingStatistics(UNKNOWN),4);
   ASSERT_EQ(stat_.countTrackingStatistics(NOT_IN_FRAME),0);
   ASSERT_EQ(stat_.countTrackingStatistics(FAILED_ALIGNEMENT),0);
@@ -146,42 +146,42 @@ TEST_F(MLPTesting, statistics) {
   ASSERT_EQ(stat_.countInFrame(),0);
   ASSERT_EQ(stat_.countTracked(),0);
   stat_.increaseStatistics(0.2);
-  localVisibility = (1-1.0/stat_.localVisibilityRange_)*localVisibility;
+  jointLocalVisibility = (1-1.0/stat_.localVisibilityRange_)*jointLocalVisibility;
   stat_.status_[0] = TRACKED;
   stat_.status_[1] = UNKNOWN;
   stat_.increaseStatistics(0.3);
-  localVisibility = (1-1.0/stat_.localVisibilityRange_)*localVisibility + 1.0/stat_.localVisibilityRange_;
+  jointLocalVisibility = (1-1.0/stat_.localVisibilityRange_)*jointLocalVisibility + 1.0/stat_.localVisibilityRange_;
   localQuality[0] = (1-1.0/stat_.localQualityRange_)*localQuality[0] + 1.0/stat_.localQualityRange_;
   stat_.status_[0] = TRACKED;
   stat_.status_[1] = NOT_IN_FRAME;
   stat_.increaseStatistics(0.4);
-  localVisibility = (1-1.0/stat_.localVisibilityRange_)*localVisibility + 1.0/stat_.localVisibilityRange_;
+  jointLocalVisibility = (1-1.0/stat_.localVisibilityRange_)*jointLocalVisibility + 1.0/stat_.localVisibilityRange_;
   localQuality[0] = (1-1.0/stat_.localQualityRange_)*localQuality[0] + 1.0/stat_.localQualityRange_;
   stat_.status_[0] = TRACKED;
   stat_.status_[1] = NOT_IN_FRAME;
   stat_.increaseStatistics(0.5);
-  localVisibility = (1-1.0/stat_.localVisibilityRange_)*localVisibility + 1.0/stat_.localVisibilityRange_;
+  jointLocalVisibility = (1-1.0/stat_.localVisibilityRange_)*jointLocalVisibility + 1.0/stat_.localVisibilityRange_;
   localQuality[0] = (1-1.0/stat_.localQualityRange_)*localQuality[0] + 1.0/stat_.localQualityRange_;
   stat_.status_[0] = FAILED_TRACKING;
   stat_.status_[1] = NOT_IN_FRAME;
   stat_.increaseStatistics(0.6);
-  localVisibility = (1-1.0/stat_.localVisibilityRange_)*localVisibility + 1.0/stat_.localVisibilityRange_;
+  jointLocalVisibility = (1-1.0/stat_.localVisibilityRange_)*jointLocalVisibility + 1.0/stat_.localVisibilityRange_;
   localQuality[0] = (1-1.0/stat_.localQualityRange_)*localQuality[0];
   stat_.status_[0] = FAILED_TRACKING;
   stat_.status_[1] = NOT_IN_FRAME;
   stat_.increaseStatistics(0.7);
-  localVisibility = (1-1.0/stat_.localVisibilityRange_)*localVisibility + 1.0/stat_.localVisibilityRange_;
+  jointLocalVisibility = (1-1.0/stat_.localVisibilityRange_)*jointLocalVisibility + 1.0/stat_.localVisibilityRange_;
   localQuality[0] = (1-1.0/stat_.localQualityRange_)*localQuality[0];
   stat_.status_[0] = TRACKED;
   stat_.status_[1] = FAILED_ALIGNEMENT;
   stat_.increaseStatistics(0.8);
-  localVisibility = (1-1.0/stat_.localVisibilityRange_)*localVisibility + 1.0/stat_.localVisibilityRange_;
+  jointLocalVisibility = (1-1.0/stat_.localVisibilityRange_)*jointLocalVisibility + 1.0/stat_.localVisibilityRange_;
   localQuality[0] = (1-1.0/stat_.localQualityRange_)*localQuality[0] + 1.0/stat_.localQualityRange_;
   localQuality[1] = (1-1.0/stat_.localQualityRange_)*localQuality[1];
   stat_.status_[0] = TRACKED;
   stat_.status_[1] = TRACKED;
   stat_.increaseStatistics(0.9);
-  localVisibility = (1-1.0/stat_.localVisibilityRange_)*localVisibility + 1.0/stat_.localVisibilityRange_;
+  jointLocalVisibility = (1-1.0/stat_.localVisibilityRange_)*jointLocalVisibility + 1.0/stat_.localVisibilityRange_;
   localQuality[0] = (1-1.0/stat_.localQualityRange_)*localQuality[0] + 1.0/stat_.localQualityRange_;
   localQuality[1] = (1-1.0/stat_.localQualityRange_)*localQuality[1] + 1.0/stat_.localQualityRange_;
   stat_.status_[0] = TRACKED;
@@ -195,7 +195,7 @@ TEST_F(MLPTesting, statistics) {
   ASSERT_EQ(stat_.countTot(),10);
   ASSERT_EQ(stat_.countInFrame(),11);
   ASSERT_EQ(stat_.countTracked(),6);
-  ASSERT_EQ(stat_.localVisibility_,localVisibility);
+  ASSERT_EQ(stat_.jointLocalVisibility_,jointLocalVisibility);
   ASSERT_EQ(stat_.localQuality_[0],localQuality[0]);
   ASSERT_EQ(stat_.localQuality_[1],localQuality[1]);
   ASSERT_EQ(stat_.getGlobalQuality(),6.0/10.0);
@@ -293,6 +293,11 @@ TEST_F(MLPTesting, getLinearAlignEquations) {
   mp_.extractMultilevelPatchFromImage(pyr2_,c_,nLevels_-1,true);
   c_.set_c(cv::Point2f(imgSize_/2+1,imgSize_/2+1));
   // NOTE: only works for patch size = 2, nLevels = 2
+  mpa_.gradientExponent_ = 0.0;
+  mpa_.huberNormThreshold_ = -1.0;
+  mpa_.useIntensityOffset_ = true;
+  mpa_.useIntensitySqew_ = false;
+  mpa_.useWeighting_ = false;
   ASSERT_EQ(mpa_.getLinearAlignEquations(pyr2_,mp_,c_,0,nLevels_-1,A,b),true);
   float meanError = (255+255*0.75)/8;
   ASSERT_EQ(b(0),255-meanError);
@@ -405,10 +410,17 @@ TEST_F(MLPTesting, align2D_old) {
 
 // Test align2D
 TEST_F(MLPTesting, align2D) {
+  // TODO: test with better patch, the current patch has a lot of local minima (e.g. for specific intensity offset and sewing)
+  mpa_.gradientExponent_ = 0.0;
+  mpa_.huberNormThreshold_ = -1.0;
+  mpa_.useIntensityOffset_ = true;
+  mpa_.useIntensitySqew_ = true;
+  mpa_.useWeighting_ = false;
   FeatureCoordinates cAligned;
   c_.set_warp_identity();
   c_.set_c(cv::Point2f(imgSize_/2,imgSize_/2));
   mp_.extractMultilevelPatchFromImage(pyr2_,c_,nLevels_-1,true);
+  mp_.patches_[0].computeGradientParameters();
   ASSERT_EQ(mpa_.align2D(cAligned,pyr2_,mp_,c_,0,nLevels_-1,100,1e-4),true);
   ASSERT_NEAR(cAligned.get_c().x,imgSize_/2,1e-2);
   ASSERT_NEAR(cAligned.get_c().y,imgSize_/2,1e-2);
@@ -419,7 +431,9 @@ TEST_F(MLPTesting, align2D) {
   ASSERT_EQ(mpa_.align2D(cAligned,pyr2_,mp_,c_,0,0,100,1e-4),true);
   ASSERT_NEAR(cAligned.get_c().x,imgSize_/2,1e-2);
   ASSERT_NEAR(cAligned.get_c().y,imgSize_/2,1e-2);
-  ASSERT_EQ(mpa_.align2D(cAligned,pyr2_,mp_,c_,1,1,100,1e-4),false);
+  ASSERT_EQ(mpa_.align2D(cAligned,pyr2_,mp_,c_,1,1,100,1e-4),true);
+  ASSERT_NEAR(cAligned.get_c().x,imgSize_/2,1e-2);
+  ASSERT_NEAR(cAligned.get_c().y,imgSize_/2,1e-2);
 
   Eigen::Matrix2f aff;
   aff << cos(M_PI/2.0), -sin(M_PI/2.0), sin(M_PI/2.0), cos(M_PI/2.0);
@@ -439,6 +453,11 @@ TEST_F(MLPTesting, align2D) {
   ASSERT_EQ(mpa_.align2D(cAligned,pyr2_,mp_,c_,0,1,100,1e-4),true);
 
   // Single step comparison
+  mpa_.gradientExponent_ = 0.0;
+  mpa_.huberNormThreshold_ = -1.0;
+  mpa_.useIntensityOffset_ = true;
+  mpa_.useIntensitySqew_ = false;
+  mpa_.useWeighting_ = false;
   cv::Point2f c1,c2;
   c_.set_c(cv::Point2f(imgSize_/2,imgSize_/2));
   mp_.extractMultilevelPatchFromImage(pyr2_,c_,nLevels_-1,true);

@@ -61,7 +61,6 @@ class StateAuxiliary: public LWF::AuxiliaryBase<StateAuxiliary<nMax,nLevels,patc
     for(unsigned int i=0;i<nMax;i++){
       A_red_[i].setIdentity();
       b_red_[i].setZero();
-      bearingMeas_[i].setIdentity();
     }
     doVECalibration_ = true;
     activeFeature_ = 0;
@@ -85,7 +84,7 @@ class StateAuxiliary: public LWF::AuxiliaryBase<StateAuxiliary<nMax,nLevels,patc
   M3D wMeasCov_;  /**<Covariance of the measured rotational rate.*/
   Eigen::Matrix2d A_red_[nMax];  /**<Reduced Jacobian of the pixel intensities w.r.t. to pixel coordinates, needed for the multilevel patch alignment. \see rovio::MultilevelPatchFeature::A_ \see rovio::getLinearAlignEquationsReduced()*/
   Eigen::Vector2d b_red_[nMax];  /**<Reduced intensity errors, needed for the multilevel patch alignment. \see rovio::MultilevelPatchFeature::A_ \see rovio::getLinearAlignEquationsReduced()*/
-  LWF::NormalVectorElement bearingMeas_[nMax];  /**<Intermediate variable for storing the measured bearing vectors.*/
+  FeatureCoordinates feaCoorMeas_[nMax];  /**<Intermediate variable for storing the measured feature location.*/
   QPD qCM_[nCam];  /**<Quaternion Array: IMU coordinates to camera coordinates.*/
   V3D MrMC_[nCam];  /**<Position Vector Array: Vectors pointing from IMU to the camera frame, expressed in the IMU frame.*/
   bool doVECalibration_;  /**<Do Camera-IMU extrinsic parameter calibration?*/
@@ -95,6 +94,7 @@ class StateAuxiliary: public LWF::AuxiliaryBase<StateAuxiliary<nMax,nLevels,patc
   double timeSinceLastImageMotion_;  /**<Time since the Image showed motion last.*/
   rot::RotationQuaternionPD poseMeasRot_; /**<Groundtruth attitude measurement. qMI.*/
   Eigen::Vector3d poseMeasLin_; /**<Groundtruth position measurement. IrIM*/
+  FeatureManager<nLevels,patchSize,nCam>* mpCurrentFeature_; /**<Pointer to active feature*/
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -546,6 +546,7 @@ class FilterState: public LWF::FilterState<State<nMax,nLevels,patchSize,nCam,nPo
   int imageCounter_;      /**<Total number of images, used so far for updates. Same as total number of update steps.*/
   ImagePyramid<nLevels> prevPyr_[nCam]; /**<Previous image pyramid.*/
   bool plotPoseMeas_; /**<Should the pose measurement be plotted.*/
+  mutable MultilevelPatch<nLevels,patchSize> mlpErrorLog_[nMax];  /**<Multilevel patch containing log of error.*/
 
   /** \brief Constructor
    */
@@ -634,9 +635,9 @@ class FilterState: public LWF::FilterState<State<nMax,nLevels,patchSize,nCam,nPo
           transformFeatureOutputCT_.transformState(state_, featureOutput_);
           if(featureOutput_.c().isInFront()){
             transformFeatureOutputCT_.transformCovMat(state_, cov_, featureOutputCov_);
-            const double uncertainty = sqrt(featureOutputCov_(2,2))*featureOutput_.d().getDistanceDerivative();
-            const double depth = fsm_.features_[i].mpDistance_->getDistance();
-            if(uncertainty/depth > maxUncertaintyToDistanceRatio){
+            const double uncertainty = std::fabs(sqrt(featureOutputCov_(2,2))*featureOutput_.d().getDistanceDerivative());
+            const double depth = featureOutput_.d().getDistance();
+            if(uncertainty/depth < maxUncertaintyToDistanceRatio){
               distanceParameterCollection[camID].push_back(featureOutput_.d().p_);
             }
           }
