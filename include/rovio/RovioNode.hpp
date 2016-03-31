@@ -517,7 +517,7 @@ class RovioNode{
           if(mpPoseUpdate_->inertialPoseIndex_ >=0){
             std::cout << "Transformation between inertial frames, IrIW, qWI: " << std::endl;
             std::cout << "  " << state.poseLin(mpPoseUpdate_->inertialPoseIndex_).transpose() << std::endl;
-            std::cout << "  " << state.poseRot(mpPoseUpdate_->inertialPoseIndex_) << std::endl;
+            std::cout << "  " << MPD(state.poseRot(mpPoseUpdate_->inertialPoseIndex_)).matrix() << std::endl;
           }
           if(mpPoseUpdate_->bodyPoseIndex_ >=0){
             std::cout << "Transformation between body frames, MrMV, qVM: " << std::endl;

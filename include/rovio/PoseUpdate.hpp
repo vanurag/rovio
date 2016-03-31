@@ -32,6 +32,7 @@
 #include "lightweight_filtering/common.hpp"
 #include "lightweight_filtering/Update.hpp"
 #include "lightweight_filtering/State.hpp"
+#include "gnuplot-iostream/gnuplot-iostream.h"
 
 namespace rovio {
 
@@ -144,7 +145,10 @@ class PoseUpdate: public LWF::Update<PoseInnovation,FILTERSTATE,PoseUpdateMeas,P
   bool noFeedbackToRovio_;
   bool doInertialAlignmentAtStart_;
   bool didAlignment_;
-  PoseUpdate(){
+  Gnuplot gp;//("gnuplot -persist");
+  std::vector<boost::tuple<double,double,double>> gp_pts_vio, gp_pts_mocap;
+  std::vector<std::vector<boost::tuple<double, double, double>>> gp_segments;
+  PoseUpdate() {
     static_assert(mtState::nPose_>inertialPoseIndex_,"Please add enough poses to the filter state (templated).");
     static_assert(mtState::nPose_>bodyPoseIndex_,"Please add enough poses to the filter state (templated).");
     qVM_.setIdentity();
@@ -171,6 +175,22 @@ class PoseUpdate: public LWF::Update<PoseInnovation,FILTERSTATE,PoseUpdateMeas,P
     boolRegister_.registerScalar("enableAttitude",enableAttitude_);
     boolRegister_.registerScalar("noFeedbackToRovio",noFeedbackToRovio_);
     boolRegister_.registerScalar("doInertialAlignmentAtStart",doInertialAlignmentAtStart_);
+
+    // plotting
+    gp << "set xrange [-2:2]\n";
+    gp << "set yrange [-2:2]\n";
+    gp << "set zrange [0:3]\n";
+    gp << "set hidden3d nooffset\n";
+//    gp << "set multiplot\n";
+
+    gp << "splot ";
+//    std::vector<std::vector<boost::tuple<double,double,double> > > pts(2);
+//    pts[0].resize(1);
+//    pts[1].resize(1);
+//    pts[0][0] = boost::make_tuple(1.0, 1.0, 1.0);
+//    pts[1][0] = boost::make_tuple(-1.0, -1.0, 1.0);
+//    gp << gp.binFile2d(pts, "record") << "with lines title 'vec of vec of boost::tuple'";
+//    gp << std::endl;
   }
   virtual ~PoseUpdate(){}
   const V3D& get_IrIW(const mtState& state) const{
@@ -262,12 +282,24 @@ class PoseUpdate: public LWF::Update<PoseInnovation,FILTERSTATE,PoseUpdateMeas,P
     isFinished = false;
     if(!didAlignment_ && doInertialAlignmentAtStart_){
       // qWI = qWM*qVM^T*qVI;
+      std::cout << "check:" << std::endl;
+      std::cout << MPD(state.qWM()).matrix() << std::endl;
+      std::cout << MPD(get_qVM(state)).matrix() << std::endl;
+      std::cout << MPD(meas.att()).matrix() << std::endl;
+      std::cout << "flag1" << std::endl;
       qWI_ = state.qWM()*get_qVM(state).inverted()*meas.att();
+      std::cout << "flag2" << std::endl;
+      std::cout << MPD(qWI_).matrix() << std::endl;
       if(inertialPoseIndex_ >= 0){
         state.poseRot(inertialPoseIndex_) = qWI_;
       }
       // IrIW = IrIV - qWI^T*(WrWM + qWM*MrMV);
+      std::cout << "check2:" << std::endl;
+      std::cout << meas.pos() << std::endl;
+      std::cout << state.WrWM() << std::endl;
+      std::cout << get_MrMV(state) << std::endl;
       IrIW_ = meas.pos() - qWI_.inverseRotate(V3D(state.WrWM() + state.qWM().rotate(get_MrMV(state))));
+      std::cout << IrIW_ << std::endl;
       if(inertialPoseIndex_ >= 0){
         state.poseLin(inertialPoseIndex_) = IrIW_;
       }
@@ -281,6 +313,23 @@ class PoseUpdate: public LWF::Update<PoseInnovation,FILTERSTATE,PoseUpdateMeas,P
     state.aux().poseMeasLin_ = get_qWI(state).rotate(V3D(meas.pos()-(get_qWI(state).inverted()*state.qWM()).rotate(get_MrMV(state))-get_IrIW(state)))+state.template get<mtState::_att>().rotate(state.MrMC(0));
     // qCW = qCM*qVM^T*qVI*qWI^T;
     state.aux().poseMeasRot_ = state.qCM(0)*get_qVM(state).inverted()*meas.att()*get_qWI(state).inverted();
+
+    // plotting
+    V3D tIC_vio = get_qWI(state).inverted().rotate(state.aux().poseMeasLin_) + get_IrIW(state);
+    QPD qIC_vio = get_qWI(state).inverted()*state.aux().poseMeasRot_.inverted();
+    V3D tIC_mocap = meas.att().inverted().rotate(get_qVM(state).rotate(V3D(state.MrMC(0) - get_MrMV(state)))) + meas.pos();
+    QPD qIC_mocap = meas.att().inverted()*get_qVM(state)*state.qCM(0).inverted();
+    gp_pts_vio.push_back(boost::make_tuple(tIC_vio.x(), tIC_vio.y(), tIC_vio.z()));
+    gp_pts_mocap.push_back(boost::make_tuple(tIC_mocap.x(), tIC_mocap.y(), tIC_mocap.z()));
+    std::vector<boost::tuple<double, double, double>> segment;
+    segment.push_back(boost::make_tuple(tIC_vio.x(), tIC_vio.y(), tIC_vio.z()));
+    segment.push_back(boost::make_tuple(tIC_mocap.x(), tIC_mocap.y(), tIC_mocap.z()));
+    gp_segments.push_back(segment);
+
+    gp << "splot" << gp.file2d(gp_segments) << "with lines linecolor rgb '#000000' title 'error',"
+                  << gp.file1d(gp_pts_vio) << "with points linecolor rgb '#ff0000' pointtype 5 pointsize 0.2 title 'ROVIO',"
+                  << gp.file1d(gp_pts_mocap) << "with points linecolor rgb '#0000ff' pointtype 7 pointsize 0.2 title 'MOCAP'" << std::endl;
+//    gp << "replot\n";
   }
 };
 
