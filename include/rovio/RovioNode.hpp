@@ -116,6 +116,11 @@ class RovioNode{
   sensor_msgs::Imu imuBiasMsg_;
   int msgSeq_;
 
+  // GNU plot
+  Gnuplot gp;//("gnuplot -persist");
+  std::vector<boost::tuple<double,double,double>> gp_pts_vio, gp_pts_mocap;
+  std::vector<std::vector<boost::tuple<double, double, double>>> gp_segments;
+
   // Rovio outputs and coordinate transformations
   typedef StandardOutput mtOutput;
   mtOutput cameraOutput_;
@@ -160,6 +165,11 @@ class RovioNode{
     forceMarkersPublishing_ = false;
     forcePatchPublishing_ = false;
     gotFirstMessages_ = false;
+
+    gp << "set xrange [-5:5]\n";
+    gp << "set yrange [-5:5]\n";
+    gp << "set zrange [0:3]\n";
+    gp << "set hidden3d nooffset\n";
 
     // Subscribe topics
     subImu_ = nh_.subscribe("imu0", 1000, &RovioNode::imuCallback,this);
@@ -465,7 +475,7 @@ class RovioNode{
    *  @param transform - Groundtruth message.
    */
   void groundtruthCallback(const geometry_msgs::TransformStamped::ConstPtr& transform){
-    std::cout << "Updating ROVIO pose using ITM post-ICP pose" << std::endl;
+    std::cout << "Reading external pose..." << std::endl;
     if(isInitialized_){
       poseUpdateMeas_.pos() = Eigen::Vector3d(transform->transform.translation.x,transform->transform.translation.y,transform->transform.translation.z);
       poseUpdateMeas_.att() = QPD(transform->transform.rotation.w,transform->transform.rotation.x,transform->transform.rotation.y,transform->transform.rotation.z);
@@ -545,6 +555,7 @@ class RovioNode{
         tf_transform_MW.child_frame_id_ = imu_frame_;
         tf_transform_MW.stamp_ = ros::Time(mpFilter_->safe_.t_);
         tf_transform_MW.setOrigin(tf::Vector3(imuOutput_.WrWB()(0),imuOutput_.WrWB()(1),imuOutput_.WrWB()(2)));
+        std::cout << "same check: " << imuOutput_.qBW().inverted() << std::endl;
         tf_transform_MW.setRotation(tf::Quaternion(imuOutput_.qBW().x(),imuOutput_.qBW().y(),imuOutput_.qBW().z(),imuOutput_.qBW().w()));
         tb_.sendTransform(tf_transform_MW);
 
@@ -703,6 +714,7 @@ class RovioNode{
               int camID = filterState.fsm_.features_[i].mpCoordinates_->camID_;
               distance = state.dep(i);
               d = distance.getDistance();
+//              std::cout << "d: " << d << std::endl;
               const double sigma = sqrt(cov(mtState::template getId<mtState::_fea>(i)+2,mtState::template getId<mtState::_fea>(i)+2));
               distance.p_ -= stretchFactor*sigma;
               d_minus = distance.getDistance();
@@ -823,15 +835,67 @@ class RovioNode{
 
         // Publish Dense Input message for REMODE
         for(int camID=0;camID<mtState::nCam_;camID++){
+          // Using MOCAP data for dense input msg
+          // qIC (mocap) = qIV*qVM*qMC
+          V3D tIC_mocap = poseUpdateMeas_.att().inverted().rotate(mpPoseUpdate_->get_qVM(state).rotate(V3D(state.MrMC(camID) - mpPoseUpdate_->get_MrMV(state)))) + poseUpdateMeas_.pos();
+          QPD qIC_mocap = poseUpdateMeas_.att().inverted()*mpPoseUpdate_->get_qVM(state)*state.qCM(camID).inverted();
+          QPD qCI_mocap = qIC_mocap.inverted();
+          V3D tCI_mocap = -qCI_mocap.rotate(tIC_mocap);
+          // qIC (vio) = qIW*qWM*qMC
+          V3D tIC_vio = mpPoseUpdate_->get_qWI(state).inverted().rotate(V3D(state.qWM().rotate(state.MrMC(0)) + state.WrWM())) + mpPoseUpdate_->get_IrIW(state);
+          QPD qIC_vio = mpPoseUpdate_->get_qWI(state).inverted()*state.qWM()*state.qCM(0).inverted();
+          // plot
+          gp_pts_mocap.push_back(boost::make_tuple(tIC_mocap.x(), tIC_mocap.y(), tIC_mocap.z()));
+          gp_pts_vio.push_back(boost::make_tuple(tIC_vio.x(), tIC_vio.y(), tIC_vio.z()));
+          // X,Y, Z axes
+          std::vector<std::vector<boost::tuple<double, double, double>>> gp_cam_axes;
+          float scale = 0.5;
+          V3D cam_x_axis(qIC_mocap.rotate(V3D(1.0, 0.0, 0.0)));
+          V3D cam_y_axis(qIC_mocap.rotate(V3D(0.0, 1.0, 0.0)));
+          V3D cam_z_axis(qIC_mocap.rotate(V3D(0.0, 0.0, 1.0)));
+          std::vector<boost::tuple<double, double, double>> gp_x_axis, gp_y_axis, gp_z_axis;
+          gp_x_axis.push_back(boost::make_tuple(0, 0, 0));
+          gp_x_axis.push_back(boost::make_tuple(1, 0, 0));
+          gp_y_axis.push_back(boost::make_tuple(0, 0, 0));
+          gp_y_axis.push_back(boost::make_tuple(0, 1, 0));
+          gp_z_axis.push_back(boost::make_tuple(0, 0, 0));
+          gp_z_axis.push_back(boost::make_tuple(0, 0, 1));
+          std::vector<boost::tuple<double, double, double>> gp_cam_x_axis;
+          gp_cam_x_axis.push_back(boost::make_tuple(tIC_mocap.x(), tIC_mocap.y(), tIC_mocap.z()));
+          gp_cam_x_axis.push_back(boost::make_tuple(tIC_mocap.x() + scale*(cam_x_axis.x()),
+                                                    tIC_mocap.y() + scale*(cam_x_axis.y()),
+                                                    tIC_mocap.z() + scale*(cam_x_axis.z())));
+          gp_cam_axes.push_back(gp_cam_x_axis);
+          std::vector<boost::tuple<double, double, double>> gp_cam_y_axis;
+          gp_cam_y_axis.push_back(boost::make_tuple(tIC_mocap.x(), tIC_mocap.y(), tIC_mocap.z()));
+          gp_cam_y_axis.push_back(boost::make_tuple(tIC_mocap.x() + scale*(cam_y_axis.x()),
+                                                    tIC_mocap.y() + scale*(cam_y_axis.y()),
+                                                    tIC_mocap.z() + scale*(cam_y_axis.z())));
+          gp_cam_axes.push_back(gp_cam_y_axis);
+          std::vector<boost::tuple<double, double, double>> gp_cam_z_axis;
+          gp_cam_z_axis.push_back(boost::make_tuple(tIC_mocap.x(), tIC_mocap.y(), tIC_mocap.z()));
+          gp_cam_z_axis.push_back(boost::make_tuple(tIC_mocap.x() + scale*(cam_z_axis.x()),
+                                                    tIC_mocap.y() + scale*(cam_z_axis.y()),
+                                                    tIC_mocap.z() + scale*(cam_z_axis.z())));
+          gp_cam_axes.push_back(gp_cam_z_axis);
+//          gp << "splot" << gp.file1d(gp_x_axis) << "with lines linecolor rgb '#ff0000' title 'X',"
+//                        << gp.file1d(gp_y_axis) << "with lines linecolor rgb '#00ff00' title 'Y',"
+//                        << gp.file1d(gp_z_axis) << "with lines linecolor rgb '#0000ff' title 'Z',"
+//                        << gp.file1d(gp_cam_x_axis) << "with lines linecolor rgb '#ff0000' title 'cam_X',"
+//                        << gp.file1d(gp_cam_y_axis) << "with lines linecolor rgb '#00ff00' title 'cam_Y',"
+//                        << gp.file1d(gp_cam_z_axis) << "with lines linecolor rgb '#0000ff' title 'cam_Z',"
+//                        << gp.file1d(gp_pts_vio) << "with points linecolor rgb '#ff0000' pointtype 5 pointsize 0.2 title 'ROVIO',"
+//                        << gp.file1d(gp_pts_mocap) << "with points linecolor rgb '#000000' pointtype 7 pointsize 0.2 title 'MOCAP'" << std::endl;
+
           if(pubREMODEDense_[camID].getNumSubscribers() > 0){
-            REMODEDenseMsg_[camID].header.seq = msgSeq_;
-            REMODEDenseMsg_[camID].header.stamp = ros::Time(mpFilter_->safe_.t_);
-            REMODEDenseMsg_[camID].frame_id = msgSeq_;
+//            REMODEDenseMsg_[camID].header.seq = msgSeq_;
+            REMODEDenseMsg_[camID].header.stamp = ros::Time::now(); //ros::Time(mpFilter_->safe_.t_);
+            REMODEDenseMsg_[camID].header.frame_id = "/dense_input_frame_id";
 
             // current image
             cv_bridge::CvImage img_msg;
-            img_msg.header.stamp = REMODEDenseMsg_[camID].header.stamp;
-            img_msg.header.frame_id = "camera";
+            img_msg.header.stamp = ros::Time::now();;
+            img_msg.header.frame_id = "/greyscale_image_frame_id";
             img_msg.image = imgUpdateMeas_.template get<mtImgMeas::_aux>().pyr_[camID].imgs_[0];
             img_msg.encoding = sensor_msgs::image_encodings::MONO8;
             REMODEDenseMsg_[camID].image = *img_msg.toImageMsg();
@@ -842,84 +906,43 @@ class RovioNode{
             float max_z = std::numeric_limits<float>::min();
 //            std::cout << "num features: " << mtState::nMax_ << std::endl;
             for (unsigned int i=0;i<mtState::nMax_; i++, offset += pclMsg_.point_step) {
-//              if(filterState.fsm_.isValid_[i]){
-              float dist = pclMsg_.data[offset + pclMsg_.fields[2].offset];
-//              std::cout << "dist check: " << dist << std::endl;
-              min_z = fmin(dist, min_z);
-              max_z = fmax(dist, max_z);
-//              }
+              if(filterState.fsm_.isValid_[i]){
+                float dist = state.dep(i).getDistance(); //pclMsg_.data[offset + pclMsg_.fields[10].offset];
+//                std::cout << "dist check: " << dist << std::endl;
+                min_z = fmin(dist, min_z);
+                max_z = fmax(dist, max_z);
+              }
             }
 //            std::cout << "z check: " << min_z << " " << max_z << std::endl;
-            REMODEDenseMsg_[camID].min_depth = min_z;
-            REMODEDenseMsg_[camID].max_depth = max_z;
-//            REMODEDenseMsg_[camID].min_depth = 0.1;
-//            REMODEDenseMsg_[camID].max_depth = 3.0;
+//            std::cout << "qIC: " << qIC_vio.w() << ", " << qIC_vio.x() << ", "
+//                                 << qIC_vio.y() << ", " << qIC_vio.z() << std::endl;
+//            std::cout << "RIC: " << MPD(qIC_vio).matrix() << std::endl;
+//            std::cout << "tIC: " << tIC_vio << std::endl;
+//            std::cout << "qIC_mocap: " << qIC_mocap.w() << ", " << qIC_mocap.x() << ", "
+//                                       << qIC_mocap.y() << ", " << qIC_mocap.z() << std::endl;
+//            std::cout << "RIC: " << MPD(qIC_mocap).matrix() << std::endl;
+//            std::cout << "tIC: " << tIC_mocap << std::endl;
+            REMODEDenseMsg_[camID].min_depth = 0.5; //min_z;
+            REMODEDenseMsg_[camID].max_depth = 5.0; //max_z;
 
-            // cam pose in world frame
-//            MPD bla(-0.99976435,  0.01757809, -0.01273799,
-//                    -0.01763682, -0.99983427,  0.00451293,
-//                    -0.01265655,  0.00473652,  0.99990868);
-//            std::cout << "qCM: " << std::endl;
-//            std::cout << state.qCM(camID).x() << " "
-//                      << state.qCM(camID).y() << " "
-//                      << state.qCM(camID).z() << " "
-//                      << state.qCM(camID).w() << " " << std::endl;
-//            std::cout << "qCM_impl: " << std::endl;
-//            std::cout << state.qCM(camID).toImplementation().x() << " "
-//                      << state.qCM(camID).toImplementation().y() << " "
-//                      << state.qCM(camID).toImplementation().z() << " "
-//                      << state.qCM(camID).toImplementation().w() << " " << std::endl;
-//            std::cout << "bla: " << std::endl;
-//            std::cout << QPD(bla).x() << " "
-//                      << QPD(bla).y() << " "
-//                      << QPD(bla).z() << " "
-//                      << QPD(bla).w() << " " << std::endl;
-//            std::cout << "bla2: " << std::endl;
-//            std::cout << MPD(QPD(bla)).matrix() << std::endl;
-            QPD q = (state.qCM(camID) * imuOutput_.qBW()).inverted(); // qIC in JPL convention
-//            QPD q = (imuOutput_.qBW()).inverted(); // test
-//            std::cout << "q_jpl: " << std::endl;
-//            std::cout << q.x() << " "
-//                      << q.y() << " "
-//                      << q.z() << " "
-//                      << q.w() << " " << std::endl;
-//            std::cout << "T_world_curr_rovio:" << std::endl;
-//            std::cout << MPD(q).matrix() << std::endl;
-            // qIC in Hamilton convention
-            // method-1
-//            double q_IC_w =
-//                sqrt( (pow(q.x(), 2) + pow(q.y(), 2) + pow(q.z(), 2) + (3*pow(q.w(), 2)) - 1.0) / 2.0 );
-//            QPD qIC(q_IC_w,
-//                   -q.w()*q.x() / q_IC_w,
-//                   -q.w()*q.y() / q_IC_w,
-//                   -q.w()*q.z() / q_IC_w);
-            // method-2
-            QPD qIC(q.w(), -q.x(), -q.y(), -q.z()); // qIC in Hamiltonian convention
+            // VIO
+            REMODEDenseMsg_[camID].pose.orientation.x = -qIC_vio.x(); // JPL->Ham
+            REMODEDenseMsg_[camID].pose.orientation.y = -qIC_vio.y();
+            REMODEDenseMsg_[camID].pose.orientation.z = -qIC_vio.z();
+            REMODEDenseMsg_[camID].pose.orientation.w = qIC_vio.w();
+            REMODEDenseMsg_[camID].pose.position.x = tIC_vio.x();
+            REMODEDenseMsg_[camID].pose.position.y = tIC_vio.y();
+            REMODEDenseMsg_[camID].pose.position.z = tIC_vio.z();
 
+            // MOCAP
+//            REMODEDenseMsg_[camID].pose.orientation.x = -qIC_mocap.x(); // JPL->Ham
+//            REMODEDenseMsg_[camID].pose.orientation.y = -qIC_mocap.y();
+//            REMODEDenseMsg_[camID].pose.orientation.z = -qIC_mocap.z();
+//            REMODEDenseMsg_[camID].pose.orientation.w = qIC_mocap.w();
+//            REMODEDenseMsg_[camID].pose.position.x = tIC_mocap.x();
+//            REMODEDenseMsg_[camID].pose.position.y = tIC_mocap.y();
+//            REMODEDenseMsg_[camID].pose.position.z = tIC_mocap.z();
 
-
-//            std::cout << "q_ham: " << std::endl;
-//            std::cout << qIC.x() << " "
-//                      << qIC.y() << " "
-//                      << qIC.z() << " "
-//                      << qIC.w() << " " << std::endl;
-//            std::cout << "qWB: " << std::endl;
-//            std::cout << imuOutput_.qBW().inverted().x() << " "
-//                      << imuOutput_.qBW().inverted().y() << " "
-//                      << imuOutput_.qBW().inverted().z() << " "
-//                      << imuOutput_.qBW().inverted().w() << " " << std::endl;
-            MPD rWB(imuOutput_.qBW().inverted());
-//            std::cout << "rWB:" << std::endl;
-//            std::cout << rWB.matrix() << std::endl;
-            V3D MrIC = rWB.matrix()*state.MrMC(camID) + imuOutput_.WrWB();
-//            V3D MrIC = imuOutput_.WrWB();
-            REMODEDenseMsg_[camID].pose.orientation.x = qIC.x();
-            REMODEDenseMsg_[camID].pose.orientation.y = qIC.y();
-            REMODEDenseMsg_[camID].pose.orientation.z = qIC.z();
-            REMODEDenseMsg_[camID].pose.orientation.w = qIC.w();
-            REMODEDenseMsg_[camID].pose.position.x = MrIC.x();
-            REMODEDenseMsg_[camID].pose.position.y = MrIC.y();
-            REMODEDenseMsg_[camID].pose.position.z = MrIC.z();
 
             pubREMODEDense_[camID].publish(REMODEDenseMsg_[camID]);
           }
