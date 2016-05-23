@@ -240,6 +240,7 @@ class PoseUpdate: public LWF::Update<PoseInnovation,FILTERSTATE,PoseUpdateMeas,P
     F.setZero();
     if(enablePosition_){
       if(!noFeedbackToRovio_){
+        std::cout << "Updating ROVIO position using groundtruth measurement" << std::endl;
         F.template block<3,3>(mtInnovation::template getId<mtInnovation::_pos>(),mtState::template getId<mtState::_pos>()) =
             MPD(get_qWI(state).inverted()).matrix();
         F.template block<3,3>(mtInnovation::template getId<mtInnovation::_pos>(),mtState::template getId<mtState::_att>()) =
@@ -258,6 +259,7 @@ class PoseUpdate: public LWF::Update<PoseInnovation,FILTERSTATE,PoseUpdateMeas,P
     }
     if(enableAttitude_){
       if(!noFeedbackToRovio_){
+        std::cout << "Updating ROVIO attitude using groundtruth measurement" << std::endl;
         F.template block<3,3>(mtInnovation::template getId<mtInnovation::_att>(),mtState::template getId<mtState::_att>()) =
             -MPD(get_qVM(state)*state.qWM().inverted()).matrix();
       }

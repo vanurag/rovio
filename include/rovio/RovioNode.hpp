@@ -175,7 +175,10 @@ class RovioNode{
     subImu_ = nh_.subscribe("imu0", 1000, &RovioNode::imuCallback,this);
     subImg0_ = nh_.subscribe("cam0/image_raw", 1000, &RovioNode::imgCallback0,this);
     subImg1_ = nh_.subscribe("cam1/image_raw", 1000, &RovioNode::imgCallback1,this);
-    subGroundtruth_ = nh_.subscribe("drz_rig/raw_transform", 1000, &RovioNode::groundtruthCallback,this);
+    // for aligning with groundtruth (mocap). SET noFeedbackToRovio = TRUE
+//    subGroundtruth_ = nh_.subscribe("drz_rig/raw_transform", 1000, &RovioNode::groundtruthCallback,this);
+    // for post-ICP pose update to ROVIO. SET noFeedbackToRovio = FALSE
+    subGroundtruth_ = nh_.subscribe("itm/pose", 1000, &RovioNode::groundtruthCallback,this);
 
     // Advertise topics
     pubTransform_ = nh_.advertise<geometry_msgs::TransformStamped>("rovio/transform", 1);
@@ -477,8 +480,12 @@ class RovioNode{
   void groundtruthCallback(const geometry_msgs::TransformStamped::ConstPtr& transform){
     std::cout << "Reading external pose..." << std::endl;
     if(isInitialized_){
-      poseUpdateMeas_.pos() = Eigen::Vector3d(transform->transform.translation.x,transform->transform.translation.y,transform->transform.translation.z);
-      poseUpdateMeas_.att() = QPD(transform->transform.rotation.w,transform->transform.rotation.x,transform->transform.rotation.y,transform->transform.rotation.z);
+      V3D t(transform->transform.translation.x,transform->transform.translation.y,transform->transform.translation.z);
+      QPD q(transform->transform.rotation.w,transform->transform.rotation.x,transform->transform.rotation.y,transform->transform.rotation.z);
+      QPD q_inv(transform->transform.rotation.w,-transform->transform.rotation.x,-transform->transform.rotation.y,-transform->transform.rotation.z);
+      V3D t_inv = -q.rotate(t);
+      poseUpdateMeas_.pos() = t;
+      poseUpdateMeas_.att() = q;
       mpFilter_->template addUpdateMeas<1>(poseUpdateMeas_,transform->header.stamp.toSec()+mpPoseUpdate_->timeOffset_);
       updateAndPublish();
     }
