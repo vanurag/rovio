@@ -1,3 +1,7 @@
 [submodule "lightweight_filtering"]
 	path = lightweight_filtering
 	url = https://bitbucket.org/bloesch/lightweight_filtering.git
+
+[submodule "gnuplot-iostream"]
+	path = include/gnuplot-iostream
+	url = https://github.com/dstahlke/gnuplot-iostream.git
