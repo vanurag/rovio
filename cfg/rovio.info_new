@@ -109,15 +109,18 @@ ImgUpdate
     removeNegativeFeatureAfterUpdate true
     useCrossCameraMeasurements true
     doStereoInitialization true
+    useIntensityOffsetForAlignment true
+    useIntensitySqewForAlignment true
     statLocalQualityRange 10
     statLocalVisibilityRange 100
     statMinGlobalQualityRange 100
+    maxNumIteration 10
     startLevel 3
     endLevel 1
     nDetectionBuckets 100
     fastDetectionThreshold 10
     alignMaxUniSample 5
-    minNoAlignment 5
+    updateVecNormTermination 1e-06
     MahalanobisTh 5.8858356
     initCovFeature_0 1
     initCovFeature_1 1
@@ -133,19 +136,22 @@ ImgUpdate
     minRelativeSTScore 0.2
     minAbsoluteSTScore 0.2
     minTimeBetweenPatchUpdate 1
-    matchingPixelThreshold 4
     removalFactor 1.1
     patchRejectionTh 10
-    specialLinearizationThreshold 0.0025
     maxUncertaintyToDepthRatioForDepthInitialization 0.3
-    bearingVectorMahalTh 9.210000000000001
     UpdateNoise
     {
-        nor 1e-05
-        int 4
+        pix 2
+        int 10000
     }
+    noiseGainForOffCamera 4
     alignConvergencePixelRange 1
     alignCoverageRatio 2
+    alignmentHuberNormThreshold 0
+    alignmentGaussianWeightingSigma 2
+    alignmentGradientExponent 0
+    discriminativeSamplingDistance 0
+    discriminativeSamplingGain 0
     ZeroVelocityUpdate
     {
         isEnabled false

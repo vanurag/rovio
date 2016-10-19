@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 project(rovio)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -march=native")
 set(ROVIO_NMAXFEATURE 25 CACHE STRING "Number of features for ROVIO")
@@ -14,6 +14,14 @@ add_definitions(-DROVIO_NPOSE=${ROVIO_NPOSE})
 
 add_subdirectory(lightweight_filtering)
 
+macro(CANONIFY_BOOL var)
+  if (${var})
+    set(${var} TRUE)
+  else()
+    set(${var} FALSE)
+  endif()
+endmacro()
+
 ##################### Find, include, and compile library #####################
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 if(0)
@@ -22,6 +30,11 @@ if(0)
 endif()
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
+
+find_package(OpenCV CONFIG COMPONENTS core features2d REQUIRED)
+CANONIFY_BOOL(OpenCV_FOUND)
+message(STATUS "OpenCV2 found: " ${OpenCV_FOUND})
+message("-- Opencv found, version ${OpenCV_VERSION}")
 
 if(MAKE_SCENE)
 	message(STATUS "Building ROVIO with openGL Scene Visualization")
