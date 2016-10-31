@@ -67,6 +67,7 @@ find_package(catkin REQUIRED COMPONENTS
 	std_msgs
 	tf
 	rosbag
+  nlopt
 )
 
 catkin_package(
@@ -86,6 +87,7 @@ catkin_package(
 	tf
 	rosbag
   yaml_cpp_catkin
+  nlopt
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${YamlCpp_INCLUDE_DIRS})
@@ -95,10 +97,16 @@ if(MAKE_SCENE)
 else()
 	add_library(${PROJECT_NAME} src/rovio_node.cpp src/Camera.cpp src/FeatureCoordinates.cpp src/FeatureDistance.cpp)
 endif()
+
+add_library(${PROJECT_NAME}_optimizer src/optimize_rovio.cpp src/Camera.cpp src/FeatureCoordinates.cpp src/FeatureDistance.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${YamlCpp_LIBRARIES} ${OpenMP_EXE_LINKER_FLAGS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARY} -lboost_iostreams -lboost_system -lboost_filesystem)
+target_link_libraries(${PROJECT_NAME}_optimizer ${catkin_LIBRARIES} ${YamlCpp_LIBRARIES} ${OpenMP_EXE_LINKER_FLAGS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARY} -lboost_iostreams -lboost_system -lboost_filesystem)
 
 add_executable(rovio_node src/rovio_node.cpp)
 target_link_libraries(rovio_node ${PROJECT_NAME})
+
+add_executable(rovio_optimizer_node src/optimize_rovio.cpp)
+target_link_libraries(rovio_optimizer_node ${PROJECT_NAME}_optimizer)
 
 add_executable(rovio_rosbag_loader src/rovio_rosbag_loader.cpp)
 target_link_libraries(rovio_rosbag_loader ${PROJECT_NAME})
