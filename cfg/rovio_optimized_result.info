@@ -59,13 +59,13 @@ Camera0
     MrMC_x 0.03465076
     MrMC_y -0.007880150000000001
     MrMC_z 0.00326664
-    CalibrationFile ""
+    CalibrationFile /home/anurag/kinfu_ws/src/rovio/cfg/visensor_cam0.yaml
 }
 PoseUpdate
 {
     enablePosition true
     enableAttitude true
-    noFeedbackToRovio false
+    noFeedbackToRovio true
     doInertialAlignmentAtStart true
     UpdateNoise
     {
@@ -77,13 +77,13 @@ PoseUpdate
         att_2 0.01
     }
     MahalanobisTh0 12.6511204
-    qVM_x 0
-    qVM_y 0
-    qVM_z 0
-    qVM_w 1
-    MrMV_x 0
-    MrMV_y 0
-    MrMV_z 0
+    qVM_x -0.0785680396294
+    qVM_y -0.576857418009
+    qVM_z -0.796847928971
+    qVM_w 0.0534263043828
+    MrMV_x -0.0068
+    MrMV_y 0.227
+    MrMV_z -0.0503
     qWI_x 0
     qWI_y 0
     qWI_z 0

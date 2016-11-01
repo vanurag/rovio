@@ -174,6 +174,7 @@ double testNloptFunc(unsigned n, const double* x, double* grad, void* my_func_da
         exit(1);
       }
       optimizer->latest_groundtruth_time_ = optimizer->ground_truth_msg_->header.stamp;
+      optimizer->rovioNode_->groundtruthCallback(optimizer->ground_truth_msg_);
     }
 
     // Ealuate score
@@ -183,10 +184,10 @@ double testNloptFunc(unsigned n, const double* x, double* grad, void* my_func_da
       optimizer->num_associations += 1;
       //std::cout << "found association" << std::endl << std::endl;
       if (score == std::numeric_limits<double>::infinity()) {
-        score = optimizer->evaluationCriterion(optimizer->ground_truth_msg_, optimizer->rovioNode_->imuOutput_.WrWB());
+        score = optimizer->evaluationCriterion();
         //std::cout << "score init: " << score << std::endl;
       } else {
-        score = score + optimizer->evaluationCriterion(optimizer->ground_truth_msg_, optimizer->rovioNode_->imuOutput_.WrWB());
+        score = score + optimizer->evaluationCriterion();
         //std::cout << "score: " << score << std::endl;
       }
     }
@@ -197,7 +198,7 @@ double testNloptFunc(unsigned n, const double* x, double* grad, void* my_func_da
   std::cout << "ROVIO performance: " << score << std::endl;
 
   // Delete and Re-create ROVIO node
-  std::cout << "Resetting ROVIO..." << std::endl << std::endl;
+  std::cout << "Resetting ROVIO..." << std::endl;
   if (optimizer->rovioNode_ != NULL) delete optimizer->rovioNode_;
   if (optimizer->rovioFilter_ != NULL) optimizer->rovioFilter_.reset();
   // Filter
@@ -213,15 +214,37 @@ double testNloptFunc(unsigned n, const double* x, double* grad, void* my_func_da
   }
   optimizer->rovioFilter_->refreshProperties();
   optimizer->rovioNode_ = new rovio::RovioNode<mtFilter>(optimizer->nh_, optimizer->nh_private_, optimizer->rovioFilter_, false);
+  std::cout << std::endl << std::endl;
 
   return score;
 }
 
 // Evaluate performance and return performance measure
-double RovioOptimizer::evaluationCriterion(const geometry_msgs::TransformStamped::ConstPtr& groundtruth_msg, const V3D rovio_pos_estimate) {
-  return pow(groundtruth_msg->transform.translation.x - rovio_pos_estimate(0), 2) +
-         pow(groundtruth_msg->transform.translation.y - rovio_pos_estimate(1), 2) +
-         pow(groundtruth_msg->transform.translation.z - rovio_pos_estimate(2), 2);
+double RovioOptimizer::evaluationCriterion() {
+
+  rovio::RovioNode<mtFilter>::mtState& state = rovioNode_->mpFilter_->safe_.state_;
+  // qIM (from groundtruth) = qIV*qVM
+  V3D tIM_mocap = rovioNode_->poseUpdateMeas_.pos() - rovioNode_->poseUpdateMeas_.att().inverted().rotate(rovioNode_->mpPoseUpdate_->get_qVM(state).rotate(rovioNode_->mpPoseUpdate_->get_MrMV(state)));
+  QPD qIM_mocap = rovioNode_->poseUpdateMeas_.att().inverted()*rovioNode_->mpPoseUpdate_->get_qVM(state);
+//  std::cout << "mocap pos: " << tIM_mocap << std::endl;
+  tf_t_.setOrigin(tf::Vector3(tIM_mocap(0), tIM_mocap(1), tIM_mocap(2)));
+  tf::Quaternion tf_q1(qIM_mocap.x(), qIM_mocap.y(), qIM_mocap.z(), qIM_mocap.w());
+  tf_t_.setRotation(tf_q1);
+  br_.sendTransform(tf::StampedTransform(tf_t_, ros::Time::now(), "world", "mocap"));
+
+  // qIM (from rovio) = qIW*qWM
+  V3D tIM_vio = rovioNode_->mpPoseUpdate_->get_qWI(state).inverted().rotate(state.WrWM()) + rovioNode_->mpPoseUpdate_->get_IrIW(state);
+  QPD qIM_vio = rovioNode_->mpPoseUpdate_->get_qWI(state).inverted()*state.qWM();
+//  std::cout << "vio pos: " << tIM_vio << std::endl;
+
+  tf_t_.setOrigin(tf::Vector3(tIM_vio(0), tIM_vio(1), tIM_vio(2)));
+  tf::Quaternion tf_q2(qIM_vio.x(), qIM_vio.y(), qIM_vio.z(), qIM_vio.w());
+  tf_t_.setRotation(tf_q2);
+  br_.sendTransform(tf::StampedTransform(tf_t_, ros::Time::now(), "world", "vio"));
+
+
+//  std::cout << "mocap pos: " << tIM_mocap << std::endl;
+  return (tIM_mocap-tIM_vio).norm();
 }
 
 // ROVIO optimization routine using NLOPT
@@ -237,7 +260,7 @@ void RovioOptimizer::optimizeRovioUsingNlopt() {
   nlopt_set_upper_bounds(opt, ub);
   nlopt_set_min_objective(opt, testNloptFunc, this);
   //nlopt_set_ftol_abs(opt, 0.0001);
-  nlopt_set_maxtime(opt, 60*5);    //less than 15 hours
+  nlopt_set_maxtime(opt, 60*15);    //less than 15 hours
 
   // initial values
   double x[19] = { 1e-4,1e-4,1e-4,4e-5,4e-5,4e-5,1e-8,1e-8,1e-8,3.8e-7,3.8e-7,3.8e-7,1e-8,7.6e-7,7.6e-7,7.6e-7,1e-8,0.0001,0.00001};

@@ -483,7 +483,7 @@ class RovioNode{
    *  @param transform - Groundtruth message.
    */
   void groundtruthCallback(const geometry_msgs::TransformStamped::ConstPtr& transform){
-    std::cout << "Reading external pose..." << std::endl;
+//    std::cout << "Reading external pose..." << std::endl;
     if(isInitialized_){
       V3D t(transform->transform.translation.x,transform->transform.translation.y,transform->transform.translation.z);
       QPD q(transform->transform.rotation.w,transform->transform.rotation.x,transform->transform.rotation.y,transform->transform.rotation.z);
