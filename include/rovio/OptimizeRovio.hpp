@@ -9,6 +9,7 @@
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
 #include <nlopt.h>
+#include <tf/transform_broadcaster.h>
 
 #ifdef ROVIO_NMAXFEATURE
 static constexpr int nMax_ = ROVIO_NMAXFEATURE;
@@ -56,7 +57,7 @@ class RovioOptimizer
   void optimizeRovioUsingNlopt();
 
   // Evaluate performance and return performance measure
-  double evaluationCriterion(const geometry_msgs::TransformStamped::ConstPtr& groundtruth_msg, const V3D rovio_pos_estimate);
+  double evaluationCriterion();
 
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;
@@ -75,6 +76,10 @@ class RovioOptimizer
   geometry_msgs::TransformStamped::ConstPtr ground_truth_msg_;
 
   ros::Time latest_groundtruth_time_, latest_estimate_time_;
+
+  // debug
+  tf::TransformBroadcaster br_;
+  tf::Transform tf_t_;
 
   // Node
   rovio::RovioNode<mtFilter> *rovioNode_;
