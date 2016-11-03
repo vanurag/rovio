@@ -252,15 +252,25 @@ void RovioOptimizer::optimizeRovioUsingNlopt() {
   // bounds
   double lb[19] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
   double ub[19] = { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+  double step[19] = {1e-5,1e-5,1e-5,
+                     1e-6,1e-6,1e-6,
+                     1e-8,1e-8,1e-8,
+                     1e-8,1e-8,1e-8,
+                     1e-8,
+                     1e-8,1e-8,1e-8,
+                     1e-8,
+                     1e-5,
+                     1e-6};
 
   nlopt_opt opt;
-  //opt = nlopt_create(NLOPT_LN_BOBYQA, 17);
-  opt = nlopt_create(NLOPT_GN_ISRES, 19);
+  opt = nlopt_create(NLOPT_LN_BOBYQA, 19);
+//  opt = nlopt_create(NLOPT_GN_ISRES, 19);
   nlopt_set_lower_bounds(opt, lb);
   nlopt_set_upper_bounds(opt, ub);
+  nlopt_set_initial_step(opt, step);
   nlopt_set_min_objective(opt, testNloptFunc, this);
   //nlopt_set_ftol_abs(opt, 0.0001);
-  nlopt_set_maxtime(opt, 60*15);    //less than 15 hours
+  nlopt_set_maxtime(opt, 60*60*15);    //less than 15 hours
 
   // initial values
   double x[19] = { 1e-4,1e-4,1e-4,4e-5,4e-5,4e-5,1e-8,1e-8,1e-8,3.8e-7,3.8e-7,3.8e-7,1e-8,7.6e-7,7.6e-7,7.6e-7,1e-8,0.0001,0.00001};
