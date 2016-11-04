@@ -173,9 +173,12 @@ class RovioNode{
 
     // Subscribe topics
     if (shouldSubscribe) {
-      subImu_ = nh_.subscribe("duo3d/imu/data_raw", 1000, &RovioNode::imuCallback,this);
-      subImg0_ = nh_.subscribe("duo3d/left/image_rect", 1000, &RovioNode::imgCallback0,this);
-      subImg1_ = nh_.subscribe("duo3d/right/image_rect", 1000, &RovioNode::imgCallback1,this);
+      subImu_ = nh_.subscribe("duo3d/imu/data_raw", 10, &RovioNode::imuCallback,this);
+      subImg0_ = nh_.subscribe("duo3d/left/image_raw", 10, &RovioNode::imgCallback0,this);
+      subImg1_ = nh_.subscribe("duo3d/right/image_raw", 10, &RovioNode::imgCallback1,this);
+//      subImu_ = nh_.subscribe("imu0", 10, &RovioNode::imuCallback,this);
+//      subImg0_ = nh_.subscribe("cam0/image_raw", 10, &RovioNode::imgCallback0,this);
+//      subImg1_ = nh_.subscribe("cam1/image_raw", 10, &RovioNode::imgCallback1,this);
     }
       // for aligning with groundtruth (mocap). SET noFeedbackToRovio = TRUE
   //    subGroundtruth_ = nh_.subscribe("drz_rig/raw_transform", 1000, &RovioNode::groundtruthCallback,this);

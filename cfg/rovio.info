@@ -1,5 +1,5 @@
 ; You can partially override parameter set in this file by creating your own subset of parameter in a separate info-file and include it with:
-#include "/home/ubuntu/catkin_ws/src/rovio/cfg/rovio_custom_duo.info"
+#include "/home/ubuntu/catkin_ws/src/rovio/cfg/rovio_custom.info"
 Common
 {
 	doVECalibration true;		Should the camera-IMU extrinsics be calibrated online

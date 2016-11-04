@@ -7,24 +7,24 @@ Common
 Camera0
 {
 	CalibrationFile ;												Camera-Calibration file for intrinsics
-	qCM_x  0.0027;										X-entry of IMU to Camera quaterion (JPL)
-	qCM_y  -0.0057;										Y-entry of IMU to Camera quaterion (JPL)
-	qCM_z  0.0098;											Z-entry of IMU to Camera quaterion (JPL)
-	qCM_w  0.9999;											W-entry of IMU to Camera quaterion (JPL)
-	MrMC_x -0.03089409;											X-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_y 0.00600669;										Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_z 0.01169448;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	qCM_x  0.00551009727492;										X-entry of IMU to Camera quaterion (JPL)
+	qCM_y  0.00575880230757;										Y-entry of IMU to Camera quaterion (JPL)
+	qCM_z  0.00414159707022;											Z-entry of IMU to Camera quaterion (JPL)
+	qCM_w  0.999959660436;											W-entry of IMU to Camera quaterion (JPL)
+	MrMC_x -0.00571973;											X-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_y 0.00706783;										Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_z 0.00797396;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
 }
 Camera1
 {
 	CalibrationFile ;												Camera-Calibration file for intrinsics
-	qCM_x  0.0047;										X-entry of IMU to Camera quaterion (JPL)
-	qCM_y  -0.0063;											Y-entry of IMU to Camera quaterion (JPL)
-	qCM_z  0.0099;											Z-entry of IMU to Camera quaterion (JPL)
-	qCM_w  0.9999;											W-entry of IMU to Camera quaterion (JPL)
-	MrMC_x -0.00103876;										X-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_y 0.0066744;											Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_z 0.01231831;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	qCM_x  0.0073675950171;										X-entry of IMU to Camera quaterion (JPL)
+	qCM_y  0.00610692686471;											Y-entry of IMU to Camera quaterion (JPL)
+	qCM_z  0.00494713706596;											Z-entry of IMU to Camera quaterion (JPL)
+	qCM_w  0.999941973316;											W-entry of IMU to Camera quaterion (JPL)
+	MrMC_x 0.02396584;										X-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_y 0.00732581;											Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_z 0.0076035;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
 }
 Init
 {
@@ -144,24 +144,24 @@ Prediction
 {
     PredictionNoise
     {
-        pos_0 1e-4;								X-covariance parameter of position prediction [m^2/s]
-        pos_1 1e-4;								Y-covariance parameter of position prediction [m^2/s]
-        pos_2 1e-4;								Z-covariance parameter of position prediction [m^2/s]
-        vel_0 4e-5; 4e-6						X-covariance parameter of velocity prediction [m^2/s^3]
-        vel_1 4e-5;								Y-covariance parameter of velocity prediction [m^2/s^3]
-        vel_2 4e-5;								Z-covariance parameter of velocity prediction [m^2/s^3]
-        acb_0 1e-8;								X-covariance parameter of accelerometer bias prediction [m^2/s^5]
-        acb_1 1e-8;								Y-covariance parameter of accelerometer bias prediction [m^2/s^5]
-        acb_2 1e-8;								Z-covariance parameter of accelerometer bias prediction [m^2/s^5]
-        gyb_0 3.8e-7;							X-covariance parameter of gyroscope bias prediction [rad^2/s^3]
-        gyb_1 3.8e-7;							Y-covariance parameter of gyroscope bias prediction [rad^2/s^3]
-        gyb_2 3.8e-7;							Z-covariance parameter of gyroscope bias prediction [rad^2/s^3]
-        vep 1e-8;								Covariance parameter of linear extrinsics prediction [m^2/s]
-        att_0 7.6e-7; 7.6e-7					X-Covariance parameter of attitude prediction [rad^2/s]
-        att_1 7.6e-7;							Y-Covariance parameter of attitude prediction [rad^2/s]
-        att_2 7.6e-7;							Z-Covariance parameter of attitude prediction [rad^2/s]
-        vea 1e-8;								Covariance parameter of rotational extrinsics prediction [rad^2/s]
-        dep 0.0001;							Covariance parameter of distance prediction [m^2/s]
+        pos_0 0.0011485;								X-covariance parameter of position prediction [m^2/s]
+        pos_1 0.0011220;								Y-covariance parameter of position prediction [m^2/s]
+        pos_2 0.0007304;								Z-covariance parameter of position prediction [m^2/s]
+        vel_0 0.000382469;    					X-covariance parameter of velocity prediction [m^2/s^3]
+        vel_1 0.000416432;								Y-covariance parameter of velocity prediction [m^2/s^3]
+        vel_2 0.000387982;								Z-covariance parameter of velocity prediction [m^2/s^3]
+        acb_0 1.48899e-07;								X-covariance parameter of accelerometer bias prediction [m^2/s^5]
+        acb_1 1.27799e-07;								Y-covariance parameter of accelerometer bias prediction [m^2/s^5]
+        acb_2 0.76302e-07;								Z-covariance parameter of accelerometer bias prediction [m^2/s^5]
+        gyb_0 3.98740e-06;							X-covariance parameter of gyroscope bias prediction [rad^2/s^3]
+        gyb_1 3.73360e-06;							Y-covariance parameter of gyroscope bias prediction [rad^2/s^3]
+        gyb_2 3.30693e-06;							Z-covariance parameter of gyroscope bias prediction [rad^2/s^3]
+        vep 9.6209e-08;								Covariance parameter of linear extrinsics prediction [m^2/s]
+        att_0 7.62010e-05; 					X-Covariance parameter of attitude prediction [rad^2/s]
+        att_1 7.45098e-05;							Y-Covariance parameter of attitude prediction [rad^2/s]
+        att_2 7.53750e-05;							Z-Covariance parameter of attitude prediction [rad^2/s]
+        vea 8.463e-06;								Covariance parameter of rotational extrinsics prediction [rad^2/s]
+        dep 5.39730e-05;							Covariance parameter of distance prediction [m^2/s]
         nor 0.00001;								Covariance parameter of bearing vector prediction [rad^2/s]
     }
     MotionDetection
@@ -193,7 +193,7 @@ PoseUpdate
 	doVisualization true;						Should the measured poses be vizualized
 	enablePosition true;						Should the linear part be used during the update
 	enableAttitude true;						Should the rotation part be used during the update (e.g. set to fals eif feeding GPS-measurement)
-	noFeedbackToRovio false;						By default the pose update is only used for aligning coordinate frame. Set to false if ROVIO should benefit frome the posed measurements.
+	noFeedbackToRovio true;						By default the pose update is only used for aligning coordinate frame. Set to false if ROVIO should benefit frome the posed measurements.
 	doInertialAlignmentAtStart true;			Should the transformation between I and W be explicitly computed and set with the first pose measurement.
 	timeOffset 0.0;								Time offset added to the pose measurement timestamps
     qVM_x 0.0;									X-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)

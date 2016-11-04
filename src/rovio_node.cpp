@@ -112,6 +112,13 @@ int main(int argc, char** argv){
   mRovioScene.addKeyboardCB('r',[&rovioNode]() mutable {rovioNode.isInitialized_=false;});
   glutMainLoop();
 #else
+//  int c;
+//  for (int i = 0; i < 100100; ++i) {
+//      std::cout << "I val: " << i << std::endl;
+//      c = std::getchar();
+//      if (c == 27) break;
+//      ros::spinOnce();
+//  }
   ros::spin();
 #endif
   return 0;
