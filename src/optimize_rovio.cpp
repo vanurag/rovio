@@ -53,6 +53,14 @@ RovioOptimizer::RovioOptimizer(ros::NodeHandle& nh, ros::NodeHandle& nh_private,
   num_associations = 0;
 
   latest_groundtruth_time_ = ros::Time(0);
+
+  // To evaluate loop close error
+  initial_position_(0) = std::numeric_limits<double>::infinity();
+  initial_position_(1) = std::numeric_limits<double>::infinity();
+  initial_position_(2) = std::numeric_limits<double>::infinity();
+  final_position_(0) = std::numeric_limits<double>::infinity();
+  final_position_(1) = std::numeric_limits<double>::infinity();
+  final_position_(2) = std::numeric_limits<double>::infinity();
 }
 
 void printPTree(boost::property_tree::ptree const& pt)
@@ -193,9 +201,11 @@ double testNloptFunc(unsigned n, const double* x, double* grad, void* my_func_da
     }
   }
 
-  // Evaluate performance (RMS error in cm)
-  if (optimizer->num_associations > 0) score = 100*sqrt(score/optimizer->num_associations);
-  std::cout << "ROVIO performance: " << score << std::endl;
+  // Evaluate performance (RMS error + Loop close error (in cm))
+  std::cout << "RMS Error (in cm): " << 100 * sqrt(score/optimizer->num_associations) << std::endl;
+  std::cout << "Loop Close Error (in cm): " << 100 * (optimizer->final_position_-optimizer->initial_position_).norm() << std::endl;
+  if (optimizer->num_associations > 0) score = 100 * ( 0.3*sqrt(score/optimizer->num_associations) + 0.7*(optimizer->final_position_-optimizer->initial_position_).norm() );
+  std::cout << "ROVIO performance (in cm): " << score << std::endl;
 
   // Delete and Re-create ROVIO node
   std::cout << "Resetting ROVIO..." << std::endl;
@@ -214,6 +224,13 @@ double testNloptFunc(unsigned n, const double* x, double* grad, void* my_func_da
   }
   optimizer->rovioFilter_->refreshProperties();
   optimizer->rovioNode_ = new rovio::RovioNode<mtFilter>(optimizer->nh_, optimizer->nh_private_, optimizer->rovioFilter_, false);
+  // reset positions
+  optimizer->initial_position_(0) = std::numeric_limits<double>::infinity();
+  optimizer->initial_position_(1) = std::numeric_limits<double>::infinity();
+  optimizer->initial_position_(2) = std::numeric_limits<double>::infinity();
+  optimizer->final_position_(0) = std::numeric_limits<double>::infinity();
+  optimizer->final_position_(1) = std::numeric_limits<double>::infinity();
+  optimizer->final_position_(2) = std::numeric_limits<double>::infinity();
   std::cout << std::endl << std::endl;
 
   return score;
@@ -226,7 +243,7 @@ double RovioOptimizer::evaluationCriterion() {
   // qIM (from groundtruth) = qIV*qVM
   V3D tIM_mocap = rovioNode_->poseUpdateMeas_.pos() - rovioNode_->poseUpdateMeas_.att().inverted().rotate(rovioNode_->mpPoseUpdate_->get_qVM(state).rotate(rovioNode_->mpPoseUpdate_->get_MrMV(state)));
   QPD qIM_mocap = rovioNode_->poseUpdateMeas_.att().inverted()*rovioNode_->mpPoseUpdate_->get_qVM(state);
-//  std::cout << "mocap pos: " << tIM_mocap << std::endl;
+  std::cout << "mocap pos: " << tIM_mocap << std::endl;
   tf_t_.setOrigin(tf::Vector3(tIM_mocap(0), tIM_mocap(1), tIM_mocap(2)));
   tf::Quaternion tf_q1(qIM_mocap.x(), qIM_mocap.y(), qIM_mocap.z(), qIM_mocap.w());
   tf_t_.setRotation(tf_q1);
@@ -235,7 +252,7 @@ double RovioOptimizer::evaluationCriterion() {
   // qIM (from rovio) = qIW*qWM
   V3D tIM_vio = rovioNode_->mpPoseUpdate_->get_qWI(state).inverted().rotate(state.WrWM()) + rovioNode_->mpPoseUpdate_->get_IrIW(state);
   QPD qIM_vio = rovioNode_->mpPoseUpdate_->get_qWI(state).inverted()*state.qWM();
-//  std::cout << "vio pos: " << tIM_vio << std::endl;
+  std::cout << "vio pos: " << tIM_vio << std::endl;
 
   tf_t_.setOrigin(tf::Vector3(tIM_vio(0), tIM_vio(1), tIM_vio(2)));
   tf::Quaternion tf_q2(qIM_vio.x(), qIM_vio.y(), qIM_vio.z(), qIM_vio.w());
@@ -244,6 +261,11 @@ double RovioOptimizer::evaluationCriterion() {
 
 
 //  std::cout << "mocap pos: " << tIM_mocap << std::endl;
+  if (initial_position_(0) == std::numeric_limits<double>::infinity()) {
+    initial_position_ = tIM_vio;
+  }
+  final_position_ = tIM_vio;
+
   return (tIM_mocap-tIM_vio).norm();
 }
 

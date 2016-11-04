@@ -76,6 +76,7 @@ class RovioOptimizer
   geometry_msgs::TransformStamped::ConstPtr ground_truth_msg_;
 
   ros::Time latest_groundtruth_time_, latest_estimate_time_;
+  V3D initial_position_, final_position_;
 
   // debug
   tf::TransformBroadcaster br_;
