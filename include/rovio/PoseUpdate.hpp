@@ -283,7 +283,7 @@ class PoseUpdate: public LWF::Update<PoseInnovation,FILTERSTATE,PoseUpdateMeas,P
     isFinished = false;
     if(!didAlignment_ && doInertialAlignmentAtStart_){
       // qWI = qWM*qVM^T*qVI;
-      std::cout << "check:" << std::endl;
+      std::cout << "doing inertial align..:" << std::endl;
       std::cout << MPD(state.qWM()).matrix() << std::endl;
       std::cout << MPD(get_qVM(state)).matrix() << std::endl;
       std::cout << MPD(meas.att()).matrix() << std::endl;
