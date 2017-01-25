@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<launch>
+  <node pkg="rovio" type="rovio_optimizer_node" name="rovio_optimizer" output="screen">
+  <param name="filter_config" value="$(find rovio)/cfg/rovio_optimize_duo.info"/>
+  <param name="optimized_filter_config" value="$(find rovio)/cfg/rovio_optimized_result.info"/>
+  <param name="camera0_config" value="$(find rovio)/cfg/duo_cam0.yaml"/>
+  <param name="camera1_config" value="$(find rovio)/cfg/duo_cam1.yaml"/>
+  <param name="bagfile" value="/media/anurag/DATA-EXT/optitrack_data/rovio_optimization/short/rovio_optim_2016-11-03-18-17-55.bag"/>
+  <param name="groundtruth_topic" value="/DJI_RIG/estimated_transform"/>
+  <param name="cam0_topic" value="/duo3d/left/image_raw"/>
+  <param name="cam1_topic" value="/duo3d/right/image_raw"/>
+  <param name="imu_topic" value="/duo3d/imu/data_raw"/>
+  </node>
+</launch>

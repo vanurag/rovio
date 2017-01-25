@@ -283,24 +283,24 @@ class PoseUpdate: public LWF::Update<PoseInnovation,FILTERSTATE,PoseUpdateMeas,P
     isFinished = false;
     if(!didAlignment_ && doInertialAlignmentAtStart_){
       // qWI = qWM*qVM^T*qVI;
-      std::cout << "doing inertial align..:" << std::endl;
-      std::cout << MPD(state.qWM()).matrix() << std::endl;
-      std::cout << MPD(get_qVM(state)).matrix() << std::endl;
-      std::cout << MPD(meas.att()).matrix() << std::endl;
-      std::cout << "flag1" << std::endl;
+      //std::cout << "check:" << std::endl;
+      //std::cout << MPD(state.qWM()).matrix() << std::endl;
+      //std::cout << MPD(get_qVM(state)).matrix() << std::endl;
+      //std::cout << MPD(meas.att()).matrix() << std::endl;
+      //std::cout << "flag1" << std::endl;
       qWI_ = state.qWM()*get_qVM(state).inverted()*meas.att();
-      std::cout << "flag2" << std::endl;
-      std::cout << MPD(qWI_).matrix() << std::endl;
+      //std::cout << "flag2" << std::endl;
+      //std::cout << MPD(qWI_).matrix() << std::endl;
       if(inertialPoseIndex_ >= 0){
         state.poseRot(inertialPoseIndex_) = qWI_;
       }
       // IrIW = IrIV - qWI^T*(WrWM + qWM*MrMV);
-      std::cout << "check2:" << std::endl;
-      std::cout << meas.pos() << std::endl;
-      std::cout << state.WrWM() << std::endl;
-      std::cout << get_MrMV(state) << std::endl;
+      //std::cout << "check2:" << std::endl;
+      //std::cout << meas.pos() << std::endl;
+      //std::cout << state.WrWM() << std::endl;
+      //std::cout << get_MrMV(state) << std::endl;
       IrIW_ = meas.pos() - qWI_.inverseRotate(V3D(state.WrWM() + state.qWM().rotate(get_MrMV(state))));
-      std::cout << IrIW_ << std::endl;
+      //std::cout << IrIW_ << std::endl;
       if(inertialPoseIndex_ >= 0){
         state.poseLin(inertialPoseIndex_) = IrIW_;
       }
@@ -316,18 +316,18 @@ class PoseUpdate: public LWF::Update<PoseInnovation,FILTERSTATE,PoseUpdateMeas,P
     state.aux().poseMeasRot_ = state.qCM(0)*get_qVM(state).inverted()*meas.att()*get_qWI(state).inverted();
 
     // plotting
-    std::cout << "cont0: " << get_qWI(state) << std::endl;
+    //std::cout << "cont0: " << get_qWI(state) << std::endl;
 //    V3D tIC_vio = get_qWI(state).inverted().rotate(state.aux().poseMeasLin_) + get_IrIW(state);
 //    QPD qIC_vio = get_qWI(state).inverted()*state.aux().poseMeasRot_.inverted();
-    std::cout << "same check: " << state.qWM() << std::endl;
+    //std::cout << "same check: " << state.qWM() << std::endl;
     V3D tIC_vio = get_qWI(state).inverted().rotate(V3D(state.qWM().rotate(state.MrMC(0)) + state.WrWM())) + get_IrIW(state);
     // qIC = qIW*qWM*qMC
     QPD qIC_vio = get_qWI(state).inverted()*state.qWM()*state.qCM(0).inverted();
     V3D tIC_mocap = meas.att().inverted().rotate(get_qVM(state).rotate(V3D(state.MrMC(0) - get_MrMV(state)))) + meas.pos();
     // qIC = qIV*qVM*qMC
     QPD qIC_mocap = meas.att().inverted()*get_qVM(state)*state.qCM(0).inverted();
-    std::cout << "cont1: " << get_qVM(state) << std::endl << state.qCM(0) << std::endl << std::endl;
-    std::cout << "const hona hai: " << get_qVM(state)*state.qCM(0).inverted() << std::endl;
+    //std::cout << "cont1: " << get_qVM(state) << std::endl << state.qCM(0) << std::endl << std::endl;
+    //std::cout << "const hona hai: " << get_qVM(state)*state.qCM(0).inverted() << std::endl;
     gp_pts_vio.push_back(boost::make_tuple(tIC_vio.x(), tIC_vio.y(), tIC_vio.z()));
     gp_pts_mocap.push_back(boost::make_tuple(tIC_mocap.x(), tIC_mocap.y(), tIC_mocap.z()));
     std::vector<boost::tuple<double, double, double>> segment;

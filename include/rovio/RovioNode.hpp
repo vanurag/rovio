@@ -173,9 +173,9 @@ class RovioNode{
 
     // Subscribe topics
     if (shouldSubscribe) {
-      subImu_ = nh_.subscribe("duo3d/imu/data_raw", 1000, &RovioNode::imuCallback,this);
-      subImg0_ = nh_.subscribe("duo3d/left/image_raw", 1000, &RovioNode::imgCallback0,this);
-      subImg1_ = nh_.subscribe("duo3d/right/image_raw", 1000, &RovioNode::imgCallback1,this);
+      subImu_ = nh_.subscribe("/duo3d/imu/data_raw", 1000, &RovioNode::imuCallback,this);
+      subImg0_ = nh_.subscribe("/duo3d/left/image_raw", 1000, &RovioNode::imgCallback0,this);
+      subImg1_ = nh_.subscribe("/duo3d/right/image_raw", 1000, &RovioNode::imgCallback1,this);
 //      subImu_ = nh_.subscribe("imu0", 1000, &RovioNode::imuCallback,this);
 //      subImg0_ = nh_.subscribe("cam0/image_raw", 1000, &RovioNode::imgCallback0,this);
 //      subImg1_ = nh_.subscribe("cam1/image_raw", 1000, &RovioNode::imgCallback1,this);
@@ -483,7 +483,7 @@ class RovioNode{
    *  @param transform - Groundtruth message.
    */
   void groundtruthCallback(const geometry_msgs::TransformStamped::ConstPtr& transform){
-    std::cout << "Reading external pose..." << std::endl;
+//    std::cout << "Reading external pose..." << std::endl;
     if(isInitialized_){
       V3D t(transform->transform.translation.x,transform->transform.translation.y,transform->transform.translation.z);
       QPD q(transform->transform.rotation.w,transform->transform.rotation.x,transform->transform.rotation.y,transform->transform.rotation.z);
@@ -567,7 +567,6 @@ class RovioNode{
         tf_transform_MW.child_frame_id_ = imu_frame_;
         tf_transform_MW.stamp_ = ros::Time(mpFilter_->safe_.t_);
         tf_transform_MW.setOrigin(tf::Vector3(imuOutput_.WrWB()(0),imuOutput_.WrWB()(1),imuOutput_.WrWB()(2)));
-        std::cout << "same check: " << imuOutput_.qBW().inverted() << std::endl;
         tf_transform_MW.setRotation(tf::Quaternion(imuOutput_.qBW().x(),imuOutput_.qBW().y(),imuOutput_.qBW().z(),imuOutput_.qBW().w()));
         tb_.sendTransform(tf_transform_MW);
 
