@@ -1,8 +1,8 @@
 Common
 {
-	doVECalibration false;		Should the camera-IMU extrinsics be calibrated online
+	doVECalibration true;		Should the camera-IMU extrinsics be calibrated online
 	depthType 1;				Type of depth parametrization (0: normal, 1: inverse depth, 2: log, 3: hyperbolic)
-	verbose false;				Is the verbose active
+	verbose true;				Is the verbose active
 }
 Camera0
 {
@@ -12,8 +12,8 @@ Camera0
 	qCM_z  -0.5;											Z-entry of IMU to Camera quaterion (JPL)
 	qCM_w  0.5;											W-entry of IMU to Camera quaterion (JPL)
 	MrMC_x 0.0;											X-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_y 0.0550;										Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_z -0.0048;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_y 0.0;										Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_z 0.0;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
 }
 Camera1
 {
@@ -23,8 +23,8 @@ Camera1
 	qCM_z  -0.5;											Z-entry of IMU to Camera quaterion (JPL)
 	qCM_w  0.5;											W-entry of IMU to Camera quaterion (JPL)
 	MrMC_x 0.0;										X-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_y -0.0550;											Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_z -0.0048;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_y 0.0;											Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_z 0.0;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
 }
 Init
 {
