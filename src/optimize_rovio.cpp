@@ -39,6 +39,8 @@ RovioOptimizer::RovioOptimizer(ros::NodeHandle& nh, ros::NodeHandle& nh_private,
   rovio_cam0_msg_ = nullptr;
   rovio_cam1_msg_ = nullptr;
   ground_truth_msg_ = nullptr;
+  ground_truth_pose_msg_ = nullptr;
+  gazebo_state_msg_ = nullptr;
 
   bag_.open(bagFileName, rosbag::bagmode::Read);
 
@@ -175,28 +177,49 @@ double testNloptFunc(unsigned n, const double* x, double* grad, void* my_func_da
 
     // Read ground truth message
     if (message_view.getTopic() == optimizer->ground_truth_topic_) {
-      optimizer->ground_truth_msg_ = message_view.instantiate<geometry_msgs::TransformStamped>();
-      if(optimizer->ground_truth_msg_ == nullptr) {
-        std::cout << "Wrong type on topic " << optimizer->ground_truth_topic_
-            << ", expected geometry_msgs::TransformStamped" << std::endl;
-        exit(1);
+      if (message_view.getDataType() == "gazebo_msgs/ModelStates") {
+        optimizer->gazebo_state_msg_ = message_view.instantiate<gazebo_msgs::ModelStates>();
+        if (optimizer->gazebo_state_msg_ != nullptr) {
+          if (optimizer->gazebo_state_msg_->name[1] == "sensor_0") {
+            optimizer->ground_truth_msg_ = boost::shared_ptr<geometry_msgs::TransformStamped>(new geometry_msgs::TransformStamped());
+            optimizer->ground_truth_msg_->transform.rotation = optimizer->gazebo_state_msg_->pose[1].orientation;
+            optimizer->ground_truth_msg_->transform.translation.x = optimizer->gazebo_state_msg_->pose[1].position.x;
+            optimizer->ground_truth_msg_->transform.translation.y = optimizer->gazebo_state_msg_->pose[1].position.y;
+            optimizer->ground_truth_msg_->transform.translation.z = optimizer->gazebo_state_msg_->pose[1].position.z;
+            optimizer->ground_truth_msg_->header.stamp =  message_view.getTime();
+          }
+        }
+      } else if(message_view.getDataType() == "geometry_msgs/PoseStamped") {
+        optimizer->ground_truth_pose_msg_ = message_view.instantiate<geometry_msgs::PoseStamped>();
+        if (optimizer->ground_truth_pose_msg_ != nullptr) {
+          optimizer->ground_truth_msg_ = boost::shared_ptr<geometry_msgs::TransformStamped>(new geometry_msgs::TransformStamped());
+          optimizer->ground_truth_msg_->transform.rotation = optimizer->ground_truth_pose_msg_->pose.orientation;
+          optimizer->ground_truth_msg_->transform.translation.x = optimizer->ground_truth_pose_msg_->pose.position.x;
+          optimizer->ground_truth_msg_->transform.translation.y = optimizer->ground_truth_pose_msg_->pose.position.y;
+          optimizer->ground_truth_msg_->transform.translation.z = optimizer->ground_truth_pose_msg_->pose.position.z;
+          optimizer->ground_truth_msg_->header.stamp =  message_view.getTime();
+        }
+      } else {
+        optimizer->ground_truth_msg_ = message_view.instantiate<geometry_msgs::TransformStamped>();
       }
-      optimizer->latest_groundtruth_time_ = optimizer->ground_truth_msg_->header.stamp;
-      optimizer->rovioNode_->groundtruthCallback(optimizer->ground_truth_msg_);
+      if(optimizer->ground_truth_msg_ != nullptr) {
+        optimizer->latest_groundtruth_time_ = optimizer->ground_truth_msg_->header.stamp;
+        optimizer->rovioNode_->groundtruthCallback(optimizer->ground_truth_msg_);
+      }
     }
 
     // Ealuate score
     optimizer->latest_estimate_time_ = ros::Time(optimizer->rovioNode_->mpFilter_->safe_.t_);
     ros::Duration delta(optimizer->latest_groundtruth_time_ - optimizer->latest_estimate_time_);
-    if (abs(delta.toSec()) < 0.05) {  // valid association
+    if (abs(delta.toSec()) < 0.05 && optimizer->rovioNode_->mpPoseUpdate_->didAlignment_) {  // valid association
       optimizer->num_associations += 1;
       //std::cout << "found association" << std::endl << std::endl;
       if (score == std::numeric_limits<double>::infinity()) {
         score = optimizer->evaluationCriterion();
-        //std::cout << "score init: " << score << std::endl;
+        std::cout << "score init: " << score << std::endl;
       } else {
         score = score + optimizer->evaluationCriterion();
-        //std::cout << "score: " << score << std::endl;
+        std::cout << "score: " << score << std::endl;
       }
     }
   }

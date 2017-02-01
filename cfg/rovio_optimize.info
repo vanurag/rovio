@@ -1,30 +1,30 @@
 Common
 {
-	doVECalibration false;		Should the camera-IMU extrinsics be calibrated online
+	doVECalibration true;		Should the camera-IMU extrinsics be calibrated online
 	depthType 1;				Type of depth parametrization (0: normal, 1: inverse depth, 2: log, 3: hyperbolic)
 	verbose false;				Is the verbose active
 }
 Camera0
 {
 	CalibrationFile ;												Camera-Calibration file for intrinsics
-	qCM_x  -0.00634891494456808;										X-entry of IMU to Camera quaterion (JPL)
-	qCM_y  0.0023125168079324446;										Y-entry of IMU to Camera quaterion (JPL)
-	qCM_z  0.9999394801673592;											Z-entry of IMU to Camera quaterion (JPL)
-	qCM_w  0.00880426033236184;											W-entry of IMU to Camera quaterion (JPL)
-	MrMC_x 0.03465076;											X-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_y -0.00788015;										Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_z 0.00326664;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	qCM_x  -0.5;										X-entry of IMU to Camera quaterion (JPL)
+	qCM_y  0.5;										Y-entry of IMU to Camera quaterion (JPL)
+	qCM_z  -0.5;											Z-entry of IMU to Camera quaterion (JPL)
+	qCM_w  0.5;											W-entry of IMU to Camera quaterion (JPL)
+	MrMC_x 0.0;											X-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_y 0.0;										Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_z 0.0;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
 }
 Camera1
 {
 	CalibrationFile ;												Camera-Calibration file for intrinsics
-	qCM_x  -0.0025678716567029115;										X-entry of IMU to Camera quaterion (JPL)
-	qCM_y  0.002654581468293421;											Y-entry of IMU to Camera quaterion (JPL)
-	qCM_z  0.9999605647756443;											Z-entry of IMU to Camera quaterion (JPL)
-	qCM_w  0.00792874517184471;											W-entry of IMU to Camera quaterion (JPL)
-	MrMC_x -0.07464269;										X-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_y -0.00593489;											Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_z 0.0037163;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	qCM_x  -0.5;										X-entry of IMU to Camera quaterion (JPL)
+	qCM_y  0.5;											Y-entry of IMU to Camera quaterion (JPL)
+	qCM_z  -0.5;											Z-entry of IMU to Camera quaterion (JPL)
+	qCM_w  0.5;											W-entry of IMU to Camera quaterion (JPL)
+	MrMC_x 0.0;										X-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_y 0.0;											Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_z 0.0;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
 }
 Init
 {
@@ -196,13 +196,13 @@ PoseUpdate
 	noFeedbackToRovio true;						By default the pose update is only used for aligning coordinate frame. Set to false if ROVIO should benefit frome the posed measurements.
 	doInertialAlignmentAtStart true;			Should the transformation between I and W be explicitly computed and set with the first pose measurement.
 	timeOffset 0.0;								Time offset added to the pose measurement timestamps
-    qVM_x -0.0785680396294;									X-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)
-    qVM_y -0.576857418009;									Y-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)
-    qVM_z -0.796847928971;									Z-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)
-    qVM_w 0.0534263043828;									W-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)
-    MrMV_x -0.0068;									X-entry of vector representing IMU to reference body coordinate frame of pose measurement
-    MrMV_y 0.2270;									Y-entry of vector representing IMU to reference body coordinate frame of pose measurement
-    MrMV_z -0.0503;									Z-entry of vector representing IMU to reference body coordinate frame of pose measurement
+    qVM_x 0.0;									X-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)
+    qVM_y 0.0;									Y-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)
+    qVM_z 0.0;									Z-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)
+    qVM_w 1.0;									W-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)
+    MrMV_x 0.0;									X-entry of vector representing IMU to reference body coordinate frame of pose measurement
+    MrMV_y 0.0;									Y-entry of vector representing IMU to reference body coordinate frame of pose measurement
+    MrMV_z 0.0;									Z-entry of vector representing IMU to reference body coordinate frame of pose measurement
     qWI_x 0.0;									X-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (JPL)
     qWI_y 0.0;									Y-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (JPL)
     qWI_z 0.0;									Z-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (JPL)
