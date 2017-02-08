@@ -1,30 +1,30 @@
 Common
 {
-	doVECalibration true;		Should the camera-IMU extrinsics be calibrated online
+	doVECalibration false;		Should the camera-IMU extrinsics be calibrated online
 	depthType 1;				Type of depth parametrization (0: normal, 1: inverse depth, 2: log, 3: hyperbolic)
 	verbose false;				Is the verbose active
 }
 Camera0
 {
 	CalibrationFile ;												Camera-Calibration file for intrinsics
-	qCM_x  -0.5;										X-entry of IMU to Camera quaterion (JPL)
-	qCM_y  0.5;										Y-entry of IMU to Camera quaterion (JPL)
-	qCM_z  -0.5;											Z-entry of IMU to Camera quaterion (JPL)
-	qCM_w  0.5;											W-entry of IMU to Camera quaterion (JPL)
-	MrMC_x 0.0;											X-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_y 0.0;										Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_z 0.0;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	qCM_x  0.0011529158641264854;										X-entry of IMU to Camera quaterion (JPL)
+	qCM_y  0.0025684285110804156;										Y-entry of IMU to Camera quaterion (JPL)
+	qCM_z  0.0033853267996468849;											Z-entry of IMU to Camera quaterion (JPL)
+	qCM_w  0.9999903067142469;											W-entry of IMU to Camera quaterion (JPL)
+	MrMC_x 0.03465076;											X-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_y -0.00788015;										Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_z 0.00326664;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
 }
 Camera1
 {
 	CalibrationFile ;												Camera-Calibration file for intrinsics
-	qCM_x  -0.5;										X-entry of IMU to Camera quaterion (JPL)
-	qCM_y  0.5;											Y-entry of IMU to Camera quaterion (JPL)
-	qCM_z  -0.5;											Z-entry of IMU to Camera quaterion (JPL)
-	qCM_w  0.5;											W-entry of IMU to Camera quaterion (JPL)
-	MrMC_x 0.0;										X-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_y 0.0;											Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_z 0.0;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	qCM_x  1.5002252416301258e-05;										X-entry of IMU to Camera quaterion (JPL)
+	qCM_y  0.0033879869688638545;											Y-entry of IMU to Camera quaterion (JPL)
+	qCM_z  0.0048526134711063462;											Z-entry of IMU to Camera quaterion (JPL)
+	qCM_w  0.9999824865775058;											W-entry of IMU to Camera quaterion (JPL)
+	MrMC_x -0.07464269;										X-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_y -0.00593489;											Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_z 0.0037163;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
 }
 Init
 {
@@ -193,7 +193,7 @@ PoseUpdate
 	doVisualization true;						Should the measured poses be vizualized
 	enablePosition true;						Should the linear part be used during the update
 	enableAttitude true;						Should the rotation part be used during the update (e.g. set to fals eif feeding GPS-measurement)
-	noFeedbackToRovio true;						By default the pose update is only used for aligning coordinate frame. Set to false if ROVIO should benefit frome the posed measurements.
+	noFeedbackToRovio false;						By default the pose update is only used for aligning coordinate frame. Set to false if ROVIO should benefit frome the posed measurements.
 	doInertialAlignmentAtStart true;			Should the transformation between I and W be explicitly computed and set with the first pose measurement.
 	timeOffset 0.0;								Time offset added to the pose measurement timestamps
     qVM_x 0.0;									X-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)

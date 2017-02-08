@@ -10,6 +10,7 @@
 #include <rosbag/view.h>
 #include <nlopt.h>
 #include <tf/transform_broadcaster.h>
+#include <gazebo_msgs/ModelStates.h>
 
 #ifdef ROVIO_NMAXFEATURE
 static constexpr int nMax_ = ROVIO_NMAXFEATURE;
@@ -73,7 +74,9 @@ class RovioOptimizer
   sensor_msgs::ImageConstPtr rovio_cam0_msg_, rovio_cam1_msg_;
   nav_msgs::Odometry::ConstPtr odom_msg_, ground_truth_odometry_msg_;
   sensor_msgs::Imu::ConstPtr imu_msg_, rovio_imu_msg_;
-  geometry_msgs::TransformStamped::ConstPtr ground_truth_msg_;
+  geometry_msgs::TransformStamped::Ptr ground_truth_msg_;
+  geometry_msgs::PoseStamped::Ptr ground_truth_pose_msg_;
+  gazebo_msgs::ModelStates::Ptr gazebo_state_msg_;
 
   ros::Time latest_groundtruth_time_, latest_estimate_time_;
   V3D initial_position_, final_position_;
