@@ -7,13 +7,13 @@ Common
 Camera0
 {
 	CalibrationFile ;												Camera-Calibration file for intrinsics
-	qCM_x  0.0011529158641264854;										X-entry of IMU to Camera quaterion (JPL)
-	qCM_y  0.0025684285110804156;										Y-entry of IMU to Camera quaterion (JPL)
-	qCM_z  0.0033853267996468849;											Z-entry of IMU to Camera quaterion (JPL)
-	qCM_w  0.9999903067142469;											W-entry of IMU to Camera quaterion (JPL)
-	MrMC_x 0.03465076;											X-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_y -0.00788015;										Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_z 0.00326664;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	qCM_x  0.00230324602389;										X-entry of IMU to Camera quaterion (JPL)
+	qCM_y  0.000780402253905;										Y-entry of IMU to Camera quaterion (JPL)
+	qCM_z  0.00228128208907;											Z-entry of IMU to Camera quaterion (JPL)
+	qCM_w  0.999994440876;											W-entry of IMU to Camera quaterion (JPL)
+	MrMC_x 0.04;											X-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_y -0.0061;										Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_z -0.0086;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
 }
 Camera1
 {
@@ -193,7 +193,7 @@ PoseUpdate
 	doVisualization true;						Should the measured poses be vizualized
 	enablePosition true;						Should the linear part be used during the update
 	enableAttitude true;						Should the rotation part be used during the update (e.g. set to fals eif feeding GPS-measurement)
-	noFeedbackToRovio false;						By default the pose update is only used for aligning coordinate frame. Set to false if ROVIO should benefit frome the posed measurements.
+	noFeedbackToRovio true;						By default the pose update is only used for aligning coordinate frame. Set to false if ROVIO should benefit frome the posed measurements.
 	doInertialAlignmentAtStart true;			Should the transformation between I and W be explicitly computed and set with the first pose measurement.
 	timeOffset 0.0;								Time offset added to the pose measurement timestamps
     qVM_x 0.0;									X-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)

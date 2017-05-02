@@ -2,29 +2,29 @@ Common
 {
 	doVECalibration false;		Should the camera-IMU extrinsics be calibrated online
 	depthType 1;				Type of depth parametrization (0: normal, 1: inverse depth, 2: log, 3: hyperbolic)
-	verbose false;				Is the verbose active
+	verbose true;				Is the verbose active
 }
 Camera0
 {
 	CalibrationFile ;												Camera-Calibration file for intrinsics
-	qCM_x  0.00551009727492;										X-entry of IMU to Camera quaterion (JPL)
-	qCM_y  0.00575880230757;										Y-entry of IMU to Camera quaterion (JPL)
-	qCM_z  0.00414159707022;											Z-entry of IMU to Camera quaterion (JPL)
-	qCM_w  0.999959660436;											W-entry of IMU to Camera quaterion (JPL)
-	MrMC_x -0.00571973;											X-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_y 0.00706783;										Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_z 0.00797396;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	qCM_x  0.0183254595495;										X-entry of IMU to Camera quaterion (JPL)
+	qCM_y  -0.0304009826009;										Y-entry of IMU to Camera quaterion (JPL)
+	qCM_z  -0.000233174457294;											Z-entry of IMU to Camera quaterion (JPL)
+	qCM_w  0.999369753895;											W-entry of IMU to Camera quaterion (JPL)
+	MrMC_x 0.0104823;											X-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_y 0.00528615;										Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_z 0.02051992;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
 }
 Camera1
 {
 	CalibrationFile ;												Camera-Calibration file for intrinsics
-	qCM_x  0.0073675950171;										X-entry of IMU to Camera quaterion (JPL)
-	qCM_y  0.00610692686471;											Y-entry of IMU to Camera quaterion (JPL)
-	qCM_z  0.00494713706596;											Z-entry of IMU to Camera quaterion (JPL)
-	qCM_w  0.999941973316;											W-entry of IMU to Camera quaterion (JPL)
-	MrMC_x 0.02396584;										X-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_y 0.00732581;											Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_z 0.0076035;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	qCM_x  0.0239668840914;										X-entry of IMU to Camera quaterion (JPL)
+	qCM_y  -0.0276057674029;											Y-entry of IMU to Camera quaterion (JPL)
+	qCM_z  0.000676297238156;											Z-entry of IMU to Camera quaterion (JPL)
+	qCM_w  0.999331302672;											W-entry of IMU to Camera quaterion (JPL)
+	MrMC_x 0.04020685;										X-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_y 0.00510821;											Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_z 0.02185091;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
 }
 Init
 {

@@ -5,7 +5,7 @@
   <param name="optimized_filter_config" value="$(find rovio)/cfg/rovio_optimized_result.info"/>
   <param name="camera0_config" value="$(find rovio)/cfg/rotors_visensor_cam0.yaml"/>
   <param name="camera1_config" value="$(find rovio)/cfg/rotors_visensor_cam1.yaml"/>
-  <param name="bagfile" value="/media/anurag/DATA-EXT/simulator_data/rotors/firefly_2017-01-30-14-38-20.bag"/>
+  <param name="bagfile" value="/media/anurag/DATA-EXT/simulator_data/rotors/firefly_2017-02-01-11-07-13_clipped.bag"/>
   <param name="groundtruth_topic" value="/firefly/vi_sensor/ground_truth/pose"/>
   <param name="cam0_topic" value="/firefly/vi_sensor/left/image_raw"/>
   <param name="cam1_topic" value="/firefly/vi_sensor/right/image_raw"/>
