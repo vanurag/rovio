@@ -32,6 +32,7 @@
 #include "lightweight_filtering/common.hpp"
 #include "lightweight_filtering/State.hpp"
 #include <opencv2/features2d/features2d.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include "rovio/Camera.hpp"
 #include "rovio/FeatureDistance.hpp"
 
@@ -311,6 +312,10 @@ class FeatureCoordinates{
    */
   float getDepthUncertaintyTau(const V3D& C1rC1C2, const float d, const float px_error_angle);
 };
+
+// Convenience type to help deal with alignment issues
+// https://eigen.tuxfamily.org/dox-devel/group__TopicStlContainers.html
+using FeatureCoordinatesVec = std::vector<FeatureCoordinates, Eigen::aligned_allocator<FeatureCoordinates>>;
 
 }
 

@@ -84,6 +84,16 @@ find_package(catkin REQUIRED COMPONENTS
 )
 find_package(OpenCV REQUIRED)
 
+add_service_files(
+  DIRECTORY srv
+  FILES SrvResetToPose.srv
+)
+
+generate_messages(DEPENDENCIES
+  std_msgs
+  geometry_msgs
+)
+
 catkin_package(
 	INCLUDE_DIRS include ${catkin_INCLUDE_DIRS}
     LIBRARIES ${PROJECT_NAME}
@@ -107,13 +117,17 @@ catkin_package(
 include_directories(include ${catkin_INCLUDE_DIRS} ${YamlCpp_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
 if(MAKE_SCENE)
-	add_library(${PROJECT_NAME} src/rovio_node.cpp src/Camera.cpp src/FeatureCoordinates.cpp src/FeatureDistance.cpp src/Scene.cpp)
+	add_library(${PROJECT_NAME} src/Camera.cpp src/FeatureCoordinates.cpp src/FeatureDistance.cpp src/Scene.cpp)
 else()
-	add_library(${PROJECT_NAME} src/rovio_node.cpp src/Camera.cpp src/FeatureCoordinates.cpp src/FeatureDistance.cpp)
+	add_library(${PROJECT_NAME} src/Camera.cpp src/FeatureCoordinates.cpp src/FeatureDistance.cpp)
 endif()
+
 add_library(${PROJECT_NAME}_optimizer src/optimize_rovio.cpp src/Camera.cpp src/FeatureCoordinates.cpp src/FeatureDistance.cpp)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${YamlCpp_LIBRARIES} ${OpenCV_LIBRARIES} ${OpenMP_EXE_LINKER_FLAGS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARY} -lboost_iostreams -lboost_system -lboost_filesystem)
 target_link_libraries(${PROJECT_NAME}_optimizer ${catkin_LIBRARIES} ${YamlCpp_LIBRARIES} ${OpenCV_LIBRARIES} ${OpenMP_EXE_LINKER_FLAGS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARY} -lboost_iostreams -lboost_system -lboost_filesystem)
+
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${YamlCpp_LIBRARIES} ${OpenMP_EXE_LINKER_FLAGS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARY}  -lboost_iostreams -lboost_system -lboost_filesystem)
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} rovio_generate_messages_cpp)
+
 
 add_executable(rovio_node src/rovio_node.cpp)
 target_link_libraries(rovio_node ${PROJECT_NAME})
@@ -123,9 +137,11 @@ target_link_libraries(rovio_optimizer_node ${PROJECT_NAME}_optimizer)
 
 add_executable(rovio_rosbag_loader src/rovio_rosbag_loader.cpp)
 target_link_libraries(rovio_rosbag_loader ${PROJECT_NAME})
+add_dependencies(rovio_rosbag_loader ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(feature_tracker_node src/feature_tracker_node.cpp)
 target_link_libraries(feature_tracker_node ${PROJECT_NAME})
+add_dependencies(feature_tracker_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/gtest/")
 	message(STATUS "Building GTests!")
