@@ -28,7 +28,7 @@ if(0)
 	find_package(OpenMP REQUIRED)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
-find_package(Eigen3 REQUIRED)
+find_package(eigen_catkin REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 find_package(OpenCV CONFIG COMPONENTS core features2d REQUIRED)
@@ -112,6 +112,7 @@ catkin_package(
 	rosbag
   yaml_cpp_catkin
   nlopt
+  eigen_catkin
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${YamlCpp_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
