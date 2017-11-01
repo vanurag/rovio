@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<launch>
+  <node pkg="rovio" type="rovio_rosbag_loader" name="rovio" output="screen">
+  <param name="filter_config" value="$(find rovio)/cfg/rovio_custom_domi.info"/>
+  <param name="camera0_config" value="$(find rovio)/cfg/domi_cam0.yaml"/>
+  <param name="camera1_config" value="$(find rovio)/cfg/domi_cam0.yaml"/>
+  <param name="rosbag_filename" value="/media/paintcopter/DATA1/rovio/rovio_2017-10-17-10-41-38.bag"/>
+  <param name="filename_out" value="/media/paintcopter/DATA1/rovio/rovio_result"/>
+  <param name="imu_topic_name" value="/uvc_camera/cam_0/imu"/>
+  <param name="cam0_topic_name" value="/uvc_camera/cam_0/image_raw"/>
+  <param name="cam1_topic_name" value="/uvc_camera/cam_1/image_raw"/>
+  </node>
+</launch>

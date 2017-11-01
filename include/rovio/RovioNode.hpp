@@ -228,7 +228,7 @@ class RovioNode{
         subImg1_ = nh_.subscribe("cam1/image_raw", 1000, &RovioNode::imgCallback1,this);
     }
       // for aligning with groundtruth (mocap). SET noFeedbackToRovio = TRUE
-  //    subGroundtruth_ = nh_.subscribe("drz_rig/raw_transform", 1000, &RovioNode::groundtruthCallback,this);
+    subGroundtruth_ = nh_.subscribe("drz_rig/raw_transform", 1000, &RovioNode::groundtruthCallback,this);
       // for post-ICP pose update to ROVIO. SET noFeedbackToRovio = FALSE
   //  subGroundtruth_ = nh_.subscribe("itm/pose", 1000, &RovioNode::groundtruthCallback,this);
 
