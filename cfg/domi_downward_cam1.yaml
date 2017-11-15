@@ -1,16 +1,16 @@
 ###### Camera Calibration File For Cam 0 of Euroc Datasets ######
 image_width: 752
 image_height: 480
-camera_name: cam0
+camera_name: cam1
 camera_matrix:
   rows: 3
   cols: 3
-  data: [300.0433798153402, 0.0, 392.20266894134295, 0.0, 311.52061345927984, 231.20077711724403, 0.0, 0.0, 1.0]
+  data: [721.3183014373152, 0.0, 383.69448160474326, 0.0, 721.3554510675314, 290.94899477161863, 0.0, 0.0, 1.0]
 distortion_model: radtan
 distortion_coefficients:
   rows: 1
-  cols: 5
-  data:  [0.00047719424184287966, 0.0010700124648564898, 0.0005982091340568392, -0.000294419237015456, 0.0]
+  cols: 4
+  data: [0.18594900087394176, -0.5165478527582268, -3.916517484546561e-05, 0.00029485938876106177]
 
 ###### Original Calibration File ######
 ## General sensor definitions.
