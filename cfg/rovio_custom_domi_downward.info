@@ -73,7 +73,7 @@ ImgUpdate
 	updateVecNormTermination 1e-4;
 	maxNumIteration 20;
     doPatchWarping true;										Should the patches be warped
-    doFrameVisualisation true;									Should the frames be visualized
+    doFrameVisualisation false;									Should the frames be visualized
     visualizePatches false;										Should the patches be visualized
     useDirectMethod true;										Should the EKF-innovation be based on direct intensity error (o.w. reprojection error)
     startLevel 2;												Highest patch level which is being employed (must be smaller than the hardcoded template parameter)
@@ -190,7 +190,7 @@ PoseUpdate
     pre_cov_MrMV 1e-4;							Covariance parameter of pose between inertial frames, linear part [m^2/s]
     pre_cov_qVM 1e-4;							Covariance parameter of pose between inertial frames, rotational part [rad^2/s]
     MahalanobisTh0 12.6511204;					Mahalonobis distance treshold of pose measurement
-	doVisualization true;						Should the measured poses be vizualized
+	doVisualization false;						Should the measured poses be vizualized
 	enablePosition true;						Should the linear part be used during the update
 	enableAttitude true;						Should the rotation part be used during the update (e.g. set to fals eif feeding GPS-measurement)
 	noFeedbackToRovio true;						By default the pose update is only used for aligning coordinate frame. Set to false if ROVIO should benefit frome the posed measurements.
