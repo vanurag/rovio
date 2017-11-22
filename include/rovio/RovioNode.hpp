@@ -1058,54 +1058,6 @@ class RovioNode{
 
           pubPatch_.publish(patchMsg_);
         }
-
-        // Publish Dense Input message for REMODE
-        for(int camID=0;camID<mtState::nCam_;camID++){
-          // Using MOCAP data for dense input msg
-          // qIC (mocap) = qIV*qVM*qMC
-          V3D tIC_mocap = poseUpdateMeas_.att().inverted().rotate(mpPoseUpdate_->get_qVM(state).rotate(V3D(state.MrMC(camID) - mpPoseUpdate_->get_MrMV(state)))) + poseUpdateMeas_.pos();
-          QPD qIC_mocap = poseUpdateMeas_.att().inverted()*mpPoseUpdate_->get_qVM(state)*state.qCM(camID).inverted();
-          QPD qCI_mocap = qIC_mocap.inverted();
-          V3D tCI_mocap = -qCI_mocap.rotate(tIC_mocap);
-          // qIC (vio) = qIW*qWM*qMC
-          V3D tIC_vio = mpPoseUpdate_->get_qWI(state).inverted().rotate(V3D(state.qWM().rotate(state.MrMC(0)) + state.WrWM())) + mpPoseUpdate_->get_IrIW(state);
-          QPD qIC_vio = mpPoseUpdate_->get_qWI(state).inverted()*state.qWM()*state.qCM(0).inverted();
-          // plot
-          gp_pts_mocap.push_back(boost::make_tuple(tIC_mocap.x(), tIC_mocap.y(), tIC_mocap.z()));
-          gp_pts_vio.push_back(boost::make_tuple(tIC_vio.x(), tIC_vio.y(), tIC_vio.z()));
-          // X,Y, Z axes
-          std::vector<std::vector<boost::tuple<double, double, double>>> gp_cam_axes;
-          float scale = 0.5;
-          V3D cam_x_axis(qIC_mocap.rotate(V3D(1.0, 0.0, 0.0)));
-          V3D cam_y_axis(qIC_mocap.rotate(V3D(0.0, 1.0, 0.0)));
-          V3D cam_z_axis(qIC_mocap.rotate(V3D(0.0, 0.0, 1.0)));
-          std::vector<boost::tuple<double, double, double>> gp_x_axis, gp_y_axis, gp_z_axis;
-          gp_x_axis.push_back(boost::make_tuple(0, 0, 0));
-          gp_x_axis.push_back(boost::make_tuple(1, 0, 0));
-          gp_y_axis.push_back(boost::make_tuple(0, 0, 0));
-          gp_y_axis.push_back(boost::make_tuple(0, 1, 0));
-          gp_z_axis.push_back(boost::make_tuple(0, 0, 0));
-          gp_z_axis.push_back(boost::make_tuple(0, 0, 1));
-          std::vector<boost::tuple<double, double, double>> gp_cam_x_axis;
-          gp_cam_x_axis.push_back(boost::make_tuple(tIC_mocap.x(), tIC_mocap.y(), tIC_mocap.z()));
-          gp_cam_x_axis.push_back(boost::make_tuple(tIC_mocap.x() + scale*(cam_x_axis.x()),
-                                                    tIC_mocap.y() + scale*(cam_x_axis.y()),
-                                                    tIC_mocap.z() + scale*(cam_x_axis.z())));
-          gp_cam_axes.push_back(gp_cam_x_axis);
-          std::vector<boost::tuple<double, double, double>> gp_cam_y_axis;
-          gp_cam_y_axis.push_back(boost::make_tuple(tIC_mocap.x(), tIC_mocap.y(), tIC_mocap.z()));
-          gp_cam_y_axis.push_back(boost::make_tuple(tIC_mocap.x() + scale*(cam_y_axis.x()),
-                                                    tIC_mocap.y() + scale*(cam_y_axis.y()),
-                                                    tIC_mocap.z() + scale*(cam_y_axis.z())));
-          gp_cam_axes.push_back(gp_cam_y_axis);
-          std::vector<boost::tuple<double, double, double>> gp_cam_z_axis;
-          gp_cam_z_axis.push_back(boost::make_tuple(tIC_mocap.x(), tIC_mocap.y(), tIC_mocap.z()));
-          gp_cam_z_axis.push_back(boost::make_tuple(tIC_mocap.x() + scale*(cam_z_axis.x()),
-                                                    tIC_mocap.y() + scale*(cam_z_axis.y()),
-                                                    tIC_mocap.z() + scale*(cam_z_axis.z())));
-          gp_cam_axes.push_back(gp_cam_z_axis);
-
-        }
         gotFirstMessages_ = true;
       }
     }
