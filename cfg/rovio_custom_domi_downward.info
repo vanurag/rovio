@@ -2,7 +2,7 @@ Common
 {
 	doVECalibration true;		Should the camera-IMU extrinsics be calibrated online
 	depthType 1;				Type of depth parametrization (0: normal, 1: inverse depth, 2: log, 3: hyperbolic)
-	verbose true;				Is the verbose active
+	verbose false;				Is the verbose active
 }
 Camera0
 {
@@ -73,7 +73,7 @@ ImgUpdate
 	updateVecNormTermination 1e-4;
 	maxNumIteration 20;
     doPatchWarping true;										Should the patches be warped
-    doFrameVisualisation false;									Should the frames be visualized
+    doFrameVisualisation true;									Should the frames be visualized
     visualizePatches false;										Should the patches be visualized
     useDirectMethod true;										Should the EKF-innovation be based on direct intensity error (o.w. reprojection error)
     startLevel 2;												Highest patch level which is being employed (must be smaller than the hardcoded template parameter)
@@ -122,7 +122,7 @@ ImgUpdate
     discriminativeSamplingGain 1.1;								Gain for threshold above which the samples must lie (if <= 1.0 the patchRejectionTh is used).
     MotionDetection
     {
-    	isEnabled 0;											Is the motion detection enabled
+    	isEnabled 1;											Is the motion detection enabled
 	    rateOfMovingFeaturesTh 0.5;								Amount of feature with motion for overall motion detection
 	    pixelCoordinateMotionTh 1.0;							Threshold for motion detection for patched [pixels]
 	    minFeatureCountForNoMotionDetection 5;					Min feature count in frame for motion detection
@@ -137,7 +137,7 @@ ImgUpdate
         }
         MahalanobisTh0 7.689997599999999;						Mahalanobid distance for zero velocity updates
         minNoMotionTime 1.0;									Min duration of no-motion
-        isEnabled 0;											Should zero velocity update be applied, only works if MotionDetection.isEnabled is true
+        isEnabled 1;											Should zero velocity update be applied, only works if MotionDetection.isEnabled is true
     }
 }
 Prediction
@@ -174,43 +174,43 @@ PoseUpdate
 {
     UpdateNoise
     {
-        pos_0 0.01;							X-Covariance of linear pose measurement update [m^2]
-        pos_1 0.01;							Y-Covariance of linear pose measurement update [m^2]
-        pos_2 0.01;							Z-Covariance of linear pose measurement update [m^2]
-        att_0 0.01;							X-Covariance of rotational pose measurement update [rad^2]
-        att_1 0.01;							Y-Covariance of rotational pose measurement update [rad^2]
-        att_2 0.01;							Z-Covariance of rotational pose measurement update [rad^2]
+        pos_0 10.0;             X-Covariance of linear pose measurement update [m^2]
+        pos_1 10.0;             Y-Covariance of linear pose measurement update [m^2]
+        pos_2 10.0;             Z-Covariance of linear pose measurement update [m^2]
+        att_0 10.0;             X-Covariance of rotational pose measurement update [rad^2]
+        att_1 10.0;             Y-Covariance of rotational pose measurement update [rad^2]
+        att_2 10.0;             Z-Covariance of rotational pose measurement update [rad^2]
     }
-	init_cov_IrIW 1;							Covariance of initial pose between inertial frames, linear part [m^2]
-	init_cov_qWI 1;								Covariance of initial pose between inertial frames, rotational part [rad^2]
-	init_cov_MrMV 1;							Covariance of initial pose between inertial frames, linear part [m^2]
-	init_cov_qVM 1;								Covariance of initial pose between inertial frames, rotational part [rad^2]
-    pre_cov_IrIW 1e-4;							Covariance parameter of pose between inertial frames, linear part [m^2/s]
-    pre_cov_qWI 1e-4;							Covariance parameter of pose between inertial frames, rotational part [rad^2/s]
-    pre_cov_MrMV 1e-4;							Covariance parameter of pose between inertial frames, linear part [m^2/s]
-    pre_cov_qVM 1e-4;							Covariance parameter of pose between inertial frames, rotational part [rad^2/s]
-    MahalanobisTh0 12.6511204;					Mahalonobis distance treshold of pose measurement
-	doVisualization false;						Should the measured poses be vizualized
-	enablePosition true;						Should the linear part be used during the update
-	enableAttitude true;						Should the rotation part be used during the update (e.g. set to fals eif feeding GPS-measurement)
-	noFeedbackToRovio true;						By default the pose update is only used for aligning coordinate frame. Set to false if ROVIO should benefit frome the posed measurements.
-	doInertialAlignmentAtStart true;			Should the transformation between I and W be explicitly computed and set with the first pose measurement.
-	timeOffset 0.0;								Time offset added to the pose measurement timestamps
-    useOdometryCov false;                    Should the UpdateNoise position covariance be scaled using the covariance in the Odometry message
-    qVM_x 0.0;									X-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (Hamilton)
-    qVM_y 0.0;									Y-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (Hamilton)
-    qVM_z 0.0;									Z-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (Hamilton)
-    qVM_w 1.0;									W-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (Hamilton)
-    MrMV_x 0.0;									X-entry of vector representing IMU to reference body coordinate frame of pose measurement
-    MrMV_y 0.0;									Y-entry of vector representing IMU to reference body coordinate frame of pose measurement
-    MrMV_z 0.0;									Z-entry of vector representing IMU to reference body coordinate frame of pose measurement
+	  init_cov_IrIW 1e-3;              Covariance of initial pose between inertial frames, linear part [m^2]
+    init_cov_qWI 1e-3;               Covariance of initial pose between inertial frames, rotational part [rad^2]
+    init_cov_MrMV 0.0;              Covariance of initial pose between inertial frames, linear part [m^2]
+    init_cov_qVM 0.0;               Covariance of initial pose between inertial frames, rotational part [rad^2]
+    pre_cov_IrIW 0.0;              Covariance parameter of pose between inertial frames, linear part [m^2/s]
+    pre_cov_qWI 0.0;             Covariance parameter of pose between inertial frames, rotational part [rad^2/s]
+    pre_cov_MrMV 0.0;              Covariance parameter of pose between inertial frames, linear part [m^2/s]
+    pre_cov_qVM 0.0;             Covariance parameter of pose between inertial frames, rotational part [rad^2/s]
+    MahalanobisTh0 10000000000000.6511204;          Mahalonobis distance treshold of pose measurement
+    doVisualization true;            Should the measured poses be vizualized
+    enablePosition true;            Should the linear part be used during the update
+    enableAttitude true;            Should the rotation part be used during the update (e.g. set to fals eif feeding GPS-measurement)
+    noFeedbackToRovio false;           By default the pose update is only used for aligning coordinate frame. Set to false if ROVIO should benefit frome the posed measurements.
+    doInertialAlignmentAtStart false;      Should the transformation between I and W be explicitly computed and set with the first pose measurement.
+    timeOffset 0.0;               Time offset added to the pose measurement timestamps
+    useOdometryCov true; Should the UpdateNoise position covariance be scaled using the covariance in the Odometry message
+    qVM_x 0.43325365;						X-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (Hamilton)
+    qVM_y -0.41776868;					Y-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (Hamilton)
+    qVM_z 0.57121979;						Z-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (Hamilton)
+    qVM_w 0.55809368;						W-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (Hamilton)
+    MrMV_x 0.038913;						X-entry of vector representing IMU to reference body coordinate frame of pose measurement
+    MrMV_y 0.10699881;					Y-entry of vector representing IMU to reference body coordinate frame of pose measurement
+    MrMV_z 0.01829302;					Z-entry of vector representing IMU to reference body coordinate frame of pose measurement
     qWI_x 0.0;									X-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (Hamilton
     qWI_y 0.0;									Y-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (Hamilton)
-    qWI_z 0.0;									Z-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (Hamilton)
-    qWI_w 1.0;									W-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (Hamilton)
+    qWI_z -0.7071;									Z-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (Hamilton)
+    qWI_w 0.7071;									W-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (Hamilton)
     IrIW_x 0.0;									X-entry of vector representing World to reference inertial coordinate frame of pose measurement
     IrIW_y 0.0;									Y-entry of vector representing World to reference inertial coordinate frame of pose measurement
-    IrIW_z 0.0;									Z-entry of vector representing World to reference inertial coordinate frame of pose measurement
+    IrIW_z 0.13;									Z-entry of vector representing World to reference inertial coordinate frame of pose measurement
 }
 VelocityUpdate
 {
