@@ -568,6 +568,7 @@ class RovioNode{
    */
   void groundtruthCallback(const geometry_msgs::TransformStamped::ConstPtr& transform){
 
+    std::cout << "in groundtruth callback.." << std::endl;
     std::lock_guard<std::mutex> lock(m_filter_);
     if(init_state_.isInitialized()){
       Eigen::Vector3d JrJV(transform->transform.translation.x,transform->transform.translation.y,transform->transform.translation.z);

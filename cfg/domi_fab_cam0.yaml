@@ -5,12 +5,12 @@ camera_name: cam0
 camera_matrix:
   rows: 3
   cols: 3
-  data: [384.15834824958216, 0.0, 373.44756267045415, 0.0, 383.45680762228125, 235.67682515726597, 0.0, 0.0, 1.0]
+  data: [720.1631866114742, 0.0, 376.37959794939815, 0.0, 715.4985685756523, 211.46989562296548, 0.0, 0.0, 1.0]
 distortion_model: equidistant
 distortion_coefficients:
   rows: 1
-  cols: 5
-  data: [-0.16105292656014306, 0.0929157825836859, -0.0858570236433119, 0.02586525165425775, 0.0]
+  cols: 4
+  data: [-0.0919071221925, -0.0392126894343, 0.0274616381753, -0.00922196576225]
 
 ###### Original Calibration File ######
 ## General sensor definitions.
@@ -33,4 +33,3 @@ distortion_coefficients:
 #intrinsics: [458.654, 457.296, 367.215, 248.375] #fu, fv, cu, cv
 #distortion_model: radial-tangential
 #distortion_coefficients: [-0.28340811, 0.07395907, 0.00019359, 1.76187114e-05]
-

@@ -2,7 +2,7 @@ Common
 {
 	doVECalibration true;		Should the camera-IMU extrinsics be calibrated online
 	depthType 1;				Type of depth parametrization (0: normal, 1: inverse depth, 2: log, 3: hyperbolic)
-	verbose true;				Is the verbose active
+	verbose false;				Is the verbose active
 }
 Camera0
 {
@@ -10,10 +10,10 @@ Camera0
 	qCM_x  -0.5;										X-entry of IMU to Camera quaterion (JPL)
 	qCM_y  0.5;										Y-entry of IMU to Camera quaterion (JPL)
 	qCM_z  -0.5;											Z-entry of IMU to Camera quaterion (JPL)
-	qCM_w  0.5;											W-entry of IMU to Camera quaterion (JPL)
+	qCM_w  -0.5;											W-entry of IMU to Camera quaterion (JPL)
 	MrMC_x 0.0;											X-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_y 0.0;										Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
-	MrMC_z 0.0;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_y 0.055;										Y-entry of IMU to Camera vector (expressed in IMU CF) [m]
+	MrMC_z -0.005;											Z-entry of IMU to Camera vector (expressed in IMU CF) [m]
 }
 Camera1
 {
@@ -196,18 +196,33 @@ PoseUpdate
 	noFeedbackToRovio true;						By default the pose update is only used for aligning coordinate frame. Set to false if ROVIO should benefit frome the posed measurements.
 	doInertialAlignmentAtStart true;			Should the transformation between I and W be explicitly computed and set with the first pose measurement.
 	timeOffset 0.0;								Time offset added to the pose measurement timestamps
-    qVM_x 0.0;									X-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)
-    qVM_y 0.0;									Y-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)
-    qVM_z 0.0;									Z-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)
-    qVM_w 1.0;									W-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (JPL)
+    useOdometryCov false;                    Should the UpdateNoise position covariance be scaled using the covariance in the Odometry message
+    qVM_x 0.0;									X-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (Hamilton)
+    qVM_y 0.0;									Y-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (Hamilton)
+    qVM_z 0.0;									Z-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (Hamilton)
+    qVM_w 1.0;									W-entry of quaterion representing IMU to reference body coordinate frame of pose measurement (Hamilton)
     MrMV_x 0.0;									X-entry of vector representing IMU to reference body coordinate frame of pose measurement
     MrMV_y 0.0;									Y-entry of vector representing IMU to reference body coordinate frame of pose measurement
     MrMV_z 0.0;									Z-entry of vector representing IMU to reference body coordinate frame of pose measurement
-    qWI_x 0.0;									X-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (JPL)
-    qWI_y 0.0;									Y-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (JPL)
-    qWI_z 0.0;									Z-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (JPL)
-    qWI_w 1.0;									W-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (JPL)
+    qWI_x 0.0;									X-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (Hamilton
+    qWI_y 0.0;									Y-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (Hamilton)
+    qWI_z 0.0;									Z-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (Hamilton)
+    qWI_w 1.0;									W-entry of quaterion representing World to reference inertial coordinate frame of pose measurement (Hamilton)
     IrIW_x 0.0;									X-entry of vector representing World to reference inertial coordinate frame of pose measurement
     IrIW_y 0.0;									Y-entry of vector representing World to reference inertial coordinate frame of pose measurement
     IrIW_z 0.0;									Z-entry of vector representing World to reference inertial coordinate frame of pose measurement
+}
+VelocityUpdate
+{
+    UpdateNoise
+    {
+        vel_0 0.0001
+        vel_1 0.0001
+        vel_2 0.0001
+    }
+    MahalanobisTh0 7.689997599999999
+    qAM_x 0
+    qAM_y 0
+    qAM_z 0
+    qAM_w 1
 }

@@ -31,7 +31,7 @@ endif()
 find_package(eigen_catkin REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
-find_package(OpenCV CONFIG COMPONENTS core features2d REQUIRED)
+find_package(OpenCV EXACT 2.4.11 CONFIG COMPONENTS core features2d REQUIRED)
 CANONIFY_BOOL(OpenCV_FOUND)
 message(STATUS "OpenCV2 found: " ${OpenCV_FOUND})
 message("-- Opencv found, version ${OpenCV_VERSION}")

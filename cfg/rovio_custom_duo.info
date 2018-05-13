@@ -2,7 +2,7 @@ Common
 {
 	doVECalibration true;		Should the camera-IMU extrinsics be calibrated online
 	depthType 1;				Type of depth parametrization (0: normal, 1: inverse depth, 2: log, 3: hyperbolic)
-	verbose true;				Is the verbose active
+	verbose false;				Is the verbose active
 }
 Camera0
 {
@@ -49,30 +49,30 @@ Init
     }
     Covariance
     {
-        pos_0 0.0001;		X-Covariance of initial position [m^2]
-        pos_1 0.0001;		Y-Covariance of initial position [m^2]
-        pos_2 0.0001;		Z-Covariance of initial position [m^2]
-        vel_0 1.0;			X-Covariance of initial velocity [m^2/s^2]
-        vel_1 1.0;			Y-Covariance of initial velocity [m^2/s^2]
-        vel_2 1.0;			Z-Covariance of initial velocity [m^2/s^2]
-        acb_0 4e-4;			X-Covariance of initial accelerometer bias [m^2/s^4]
-        acb_1 4e-4;			Y-Covariance of initial accelerometer bias [m^2/s^4]
-        acb_2 4e-4;			Z-Covariance of initial accelerometer bias [m^2/s^4]
-        gyb_0 3e-4;			X-Covariance of initial gyroscope bias [rad^2/s^2]
-        gyb_1 3e-4;			Y-Covariance of initial gyroscope bias [rad^2/s^2]
-        gyb_2 3e-4;			Z-Covariance of initial gyroscope bias [rad^2/s^2]
-        vep 0.0001;			Covariance of initial linear camera-IMU extrinsics, same for all entries [m^2]
-        att_0 0.1;			X-Covariance of initial attitude [rad^2]
-        att_1 0.1;			Y-Covariance of initial attitude [rad^2]
-        att_2 0.1;			Z-Covariance of initial attitude [rad^2]
-        vea 0.0001;			Covariance of initial rotational camera-IMU extrinsics, same for all entries [rad^2]
+        pos_0 0.0001;   X-Covariance of initial position [m^2]
+        pos_1 0.0001;   Y-Covariance of initial position [m^2]
+        pos_2 0.0001;   Z-Covariance of initial position [m^2]
+        vel_0 1.0;      X-Covariance of initial velocity [m^2/s^2]
+        vel_1 1.0;      Y-Covariance of initial velocity [m^2/s^2]
+        vel_2 1.0;      Z-Covariance of initial velocity [m^2/s^2]
+        acb_0 4e-2;     X-Covariance of initial accelerometer bias [m^2/s^4]
+        acb_1 4e-2;     Y-Covariance of initial accelerometer bias [m^2/s^4]
+        acb_2 4e-2;     Z-Covariance of initial accelerometer bias [m^2/s^4]
+        gyb_0 3e-2;     X-Covariance of initial gyroscope bias [rad^2/s^2]
+        gyb_1 3e-2;     Y-Covariance of initial gyroscope bias [rad^2/s^2]
+        gyb_2 3e-2;     Z-Covariance of initial gyroscope bias [rad^2/s^2]
+        vep 0.0001;     Covariance of initial linear camera-IMU extrinsics, same for all entries [m^2]
+        att_0 0.1;      X-Covariance of initial attitude [rad^2]
+        att_1 0.1;      Y-Covariance of initial attitude [rad^2]
+        att_2 0.1;      Z-Covariance of initial attitude [rad^2]
+        vea 0.01;     Covariance of initial rotational camera-IMU extrinsics, same for all entries [rad^2]
     }
 }
 ImgUpdate
 {
 	updateVecNormTermination 1e-4;
 	maxNumIteration 20;
-    doPatchWarping true;										Should the patches be warped
+    doPatchWarping false;										Should the patches be warped
     doFrameVisualisation true;									Should the frames be visualized
     visualizePatches false;										Should the patches be visualized
     useDirectMethod true;										Should the EKF-innovation be based on direct intensity error (o.w. reprojection error)
@@ -85,13 +85,13 @@ ImgUpdate
         pix 2;													Covariance used for the reprojection error, 1/focal_length is roughly 1 pixel std [rad] (~1/f ~ 1/400^2 = 1/160000)
         int 400;												Covariance used for the photometric error [intensity^2]
     }
-    initCovFeature_0 4.0;										Covariance for the initial distance (Relative to initialization depth [m^2/m^2])
+    initCovFeature_0 0.5;										Covariance for the initial distance (Relative to initialization depth [m^2/m^2])
     initCovFeature_1 1e-5;										Covariance for the initial bearing vector, x-component [rad^2]
     initCovFeature_2 1e-5;										Covariance for the initial bearing vector, y-component [rad^2]
     initDepth 0.5;												Initial value for the initial distance parameter
     startDetectionTh 0.8;										Threshold for detecting new features (min: 0, max: 1)
     scoreDetectionExponent 0.25;								Exponent used for weighting the distance between candidates
-    penaltyDistance 50;										Maximal distance which gets penalized during bucketing [pix]
+    penaltyDistance 100;										Maximal distance which gets penalized during bucketing [pix]
     zeroDistancePenalty 100;									Penalty for zero distance (max: nDetectionBuckets)
     statLocalQualityRange 10;									Number of frames for local quality evaluation
     statLocalVisibilityRange 100;								Number of frames for local visibility evaluation
@@ -106,7 +106,7 @@ ImgUpdate
     fastDetectionThreshold 5;									Fast corner detector treshold while adding new feature
     alignConvergencePixelRange 10;								Assumed convergence range for image alignment (gets scaled with the level) [pixels]
     alignCoverageRatio 2;										How many sigma of the uncertainty should be covered in the adaptive alignement
-    alignMaxUniSample 1;										Maximal number of alignment seeds on one side -> total number of sample = 2n+1. Carefull can get very costly if diverging!
+    alignMaxUniSample 0;										Maximal number of alignment seeds on one side -> total number of sample = 2n+1. Carefull can get very costly if diverging!
     patchRejectionTh 50.0;										If the average itensity error is larger than this the feauture is rejected [intensity], if smaller 0 the no check is performed
     alignmentHuberNormThreshold 10;								Intensity error threshold for Huber norm (enabled if > 0)
     alignmentGaussianWeightingSigma -1;							Width of Gaussian which is used for pixel error weighting (enabled if > 0)
@@ -227,3 +227,4 @@ VelocityUpdate
     qAM_z 0
     qAM_w 1
 }
+
