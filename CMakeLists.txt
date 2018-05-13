@@ -31,7 +31,7 @@ endif()
 find_package(eigen_catkin REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
-find_package(OpenCV EXACT 2.4.11 CONFIG COMPONENTS core features2d REQUIRED)
+find_package(OpenCV REQUIRED EXACT 2.4.11 COMPONENTS core highgui imgproc features2d)
 CANONIFY_BOOL(OpenCV_FOUND)
 message(STATUS "OpenCV2 found: " ${OpenCV_FOUND})
 message("-- Opencv found, version ${OpenCV_VERSION}")
@@ -122,11 +122,12 @@ if(MAKE_SCENE)
 else()
 	add_library(${PROJECT_NAME} src/Camera.cpp src/FeatureCoordinates.cpp src/FeatureDistance.cpp)
 endif()
+<<<<<<< HEAD
 
 #add_library(${PROJECT_NAME}_optimizer src/optimize_rovio.cpp src/Camera.cpp src/FeatureCoordinates.cpp src/FeatureDistance.cpp)
 #target_link_libraries(${PROJECT_NAME}_optimizer ${catkin_LIBRARIES} ${YamlCpp_LIBRARIES} ${OpenCV_LIBRARIES} ${OpenMP_EXE_LINKER_FLAGS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARY} -lboost_iostreams -lboost_system -lboost_filesystem)
 
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${YamlCpp_LIBRARIES} ${OpenMP_EXE_LINKER_FLAGS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARY}  -lboost_iostreams -lboost_system -lboost_filesystem)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${YamlCpp_LIBRARIES} ${OpenMP_EXE_LINKER_FLAGS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARY} ${OpenCV_LIBRARIES} -lboost_iostreams -lboost_system -lboost_filesystem)
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} rovio_generate_messages_cpp)
 
 

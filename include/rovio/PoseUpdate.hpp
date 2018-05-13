@@ -169,6 +169,7 @@ class PoseUpdate: public LWF::Update<PoseInnovation,FILTERSTATE,PoseUpdateMeas,P
     MrMV_.setZero();
     qWI_.setIdentity();
     IrIW_.setZero();
+    defaultUpdnoiP_.setZero();
     timeOffset_ = 0.0;
     enablePosition_ = true;
     enableAttitude_ = true;
