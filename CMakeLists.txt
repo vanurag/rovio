@@ -122,7 +122,6 @@ if(MAKE_SCENE)
 else()
 	add_library(${PROJECT_NAME} src/Camera.cpp src/FeatureCoordinates.cpp src/FeatureDistance.cpp)
 endif()
-<<<<<<< HEAD
 
 #add_library(${PROJECT_NAME}_optimizer src/optimize_rovio.cpp src/Camera.cpp src/FeatureCoordinates.cpp src/FeatureDistance.cpp)
 #target_link_libraries(${PROJECT_NAME}_optimizer ${catkin_LIBRARIES} ${YamlCpp_LIBRARIES} ${OpenCV_LIBRARIES} ${OpenMP_EXE_LINKER_FLAGS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARY} -lboost_iostreams -lboost_system -lboost_filesystem)
