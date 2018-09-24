@@ -31,7 +31,7 @@ endif()
 find_package(eigen_catkin REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
-find_package(OpenCV CONFIG COMPONENTS core features2d REQUIRED)
+find_package(OpenCV 3 CONFIG COMPONENTS core features2d REQUIRED)
 CANONIFY_BOOL(OpenCV_FOUND)
 message(STATUS "OpenCV2 found: " ${OpenCV_FOUND})
 message("-- Opencv found, version ${OpenCV_VERSION}")
@@ -131,17 +131,17 @@ add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EX
 
 
 add_executable(rovio_node src/rovio_node.cpp)
-target_link_libraries(rovio_node ${PROJECT_NAME})
+target_link_libraries(rovio_node ${PROJECT_NAME} ${OpenCV_LIBRARIES})
 
 #add_executable(rovio_optimizer_node src/optimize_rovio.cpp)
 #target_link_libraries(rovio_optimizer_node ${PROJECT_NAME}_optimizer)
 
 add_executable(rovio_rosbag_loader src/rovio_rosbag_loader.cpp)
-target_link_libraries(rovio_rosbag_loader ${PROJECT_NAME})
+target_link_libraries(rovio_rosbag_loader ${PROJECT_NAME} ${OpenCV_LIBRARIES})
 add_dependencies(rovio_rosbag_loader ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(feature_tracker_node src/feature_tracker_node.cpp)
-target_link_libraries(feature_tracker_node ${PROJECT_NAME})
+target_link_libraries(feature_tracker_node ${PROJECT_NAME} ${OpenCV_LIBRARIES})
 add_dependencies(feature_tracker_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/gtest/")
