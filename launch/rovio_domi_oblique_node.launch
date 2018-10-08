@@ -2,7 +2,7 @@
 <launch>
   <group ns="blackbird" >
     <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
-    <param name="filter_config" value="$(find rovio)/cfg/rovio_custom_domi_downward.info"/>
+    <param name="filter_config" value="$(find rovio)/cfg/rovio_custom_domi_oblique.info"/>
     <param name="camera0_config" value="$(find rovio)/cfg/domi_downward_cam0.yaml"/>
     <param name="camera1_config" value="$(find rovio)/cfg/domi_downward_cam1.yaml"/>
     <param name="world_frame" value="odom"/>

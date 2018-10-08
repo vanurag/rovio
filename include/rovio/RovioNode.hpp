@@ -1030,6 +1030,7 @@ class RovioNode{
         }
         if(pubPatch_.getNumSubscribers() > 0 || forcePatchPublishing_){
           patchMsg_.header.seq = msgSeq_;
+          patchMsg_.header.frame_id = world_frame_;
           patchMsg_.header.stamp = ros::Time(mpFilter_->safe_.t_);
           int offset = 0;
           for (unsigned int i=0;i<mtState::nMax_; i++, offset += patchMsg_.point_step) {
